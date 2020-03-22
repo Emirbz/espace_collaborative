@@ -34,6 +34,7 @@ public class NotificationServiceImpl implements NotificationService {
         bridgeEvents.put("admin", event);
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("address", "chat.to.client");
+        
 
         event.socket().write(newMessage("Jhon Joined"));
 
