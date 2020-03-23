@@ -8,6 +8,9 @@ import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.text.DateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
         bridgeEvents.put("admin", event);
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("address", "chat.to.client");
-        
+
 
         event.socket().write(newMessage("Jhon Joined"));
 
@@ -44,10 +47,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void onMessage(BridgeEvent event, EventBus eventBus) {
+        String timestamp = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date.from(Instant.now()));
+
         LOG.info("A socket send "+ event.getRawMessage());
         JsonObject jsonObject = event.getRawMessage();
         jsonObject.put("body", jsonObject.getString("body"));
+       // jsonObject.put("timestamp", timestamp);
         eventBus.publish("chat.to.client", jsonObject);
+
 
     }
 
