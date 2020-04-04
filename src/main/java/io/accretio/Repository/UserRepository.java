@@ -22,4 +22,5 @@ public class UserRepository implements PanacheRepository<User> {
         return find("firstName Like concat('%', ?1, '%')",searchToken).list();
     }
 
+
 }

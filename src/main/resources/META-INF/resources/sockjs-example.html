@@ -85,7 +85,7 @@
         if (!connected) {
             var token = $("#name").val();
 
-            eventBus = new EventBus('http://localhost:8089/ws/chat?user=' + token);
+            eventBus = new EventBus('http://268fe392.ngrok.io/ws/chat?user=' + token);
             eventBus.enableReconnect(true);
             eventBus.onopen = function () {
 

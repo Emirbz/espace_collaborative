@@ -3,6 +3,7 @@ package io.accretio.Models;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.security.identity.SecurityIdentity;
 import org.jboss.resteasy.spi.touri.MappedBy;
 
 import javax.persistence.*;
@@ -18,21 +19,22 @@ import java.util.Set;
 public class User extends PanacheEntityBase {
 
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
-    public long id;
+    public String  id;
     public String firstName;
     public String lastName;
     public String email;
+    private String username;
 
     @Lob
-    public String image;
+    private String image;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -76,6 +78,22 @@ public class User extends PanacheEntityBase {
         this.rooms = rooms;
     }
 
+
+     User(String userName) {
+        this.username = userName;
+    }
+
+   public User(SecurityIdentity identity) {
+        this.username = identity.getPrincipal().getName();
+    }
+
+public  User()
+{
+
+}
+
+
+
     @Override
     public String toString() {
         return "User{" +
@@ -91,13 +109,7 @@ public class User extends PanacheEntityBase {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<Room> rooms = new HashSet<>();
 
-    public List<Message> getMessages() {
-        return messages;
-    }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
 
 
 
@@ -106,7 +118,7 @@ public class User extends PanacheEntityBase {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
+        return id.equals(user.id) &&
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
                 Objects.equals(email, user.email) &&
@@ -118,8 +130,17 @@ public class User extends PanacheEntityBase {
         return Objects.hash(id, firstName, lastName, email, image);
     }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private List<Message> messages;
+  /*   public List<Message> getMessages() {
+        return messages;
+    }
 
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
+
+
+   @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    private List<Message> messages;
+*/
 
 }

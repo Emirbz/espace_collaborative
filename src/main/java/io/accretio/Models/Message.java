@@ -10,11 +10,10 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 
-@Table
-@Entity
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "id")
 public class Message extends PanacheEntityBase {
-    public enum type {
+ /*   public enum type {
         TEXT,
         IMAGE,
         AUDIO,
@@ -37,9 +36,7 @@ public class Message extends PanacheEntityBase {
 
 
 
-    public void setRoom(Room room) {
-        this.room = room;
-    }
+
 
 
 
@@ -68,6 +65,9 @@ public class Message extends PanacheEntityBase {
     public User getUser() {
         return user;
     }
+       public void setRoom(Room room) {
+        this.room = room;
+    }
 
     public void setUser(User userId) {
         this.user = userId;
@@ -89,6 +89,6 @@ public class Message extends PanacheEntityBase {
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.MERGE)
     @JoinColumn (name="user_id",referencedColumnName="id")
-    private User user;
+    private User user;*/
 
 }

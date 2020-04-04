@@ -62,13 +62,7 @@ public class Room extends PanacheEntityBase {
         return users;
     }
 
-    public List<Message> getMessages() {
-        return messages;
-    }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
 
     public void setUsers(Set<User> users) {
         this.users = users;
@@ -76,7 +70,7 @@ public class Room extends PanacheEntityBase {
 
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "room_user",
+    @JoinTable(name = "user_room",
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> users = new HashSet<>();
@@ -110,9 +104,15 @@ public class Room extends PanacheEntityBase {
         return Objects.hash(id, name, image, subject, users);
     }
 
+    /*public List<Message> getMessages() {
+        return messages;
+    }
 
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
     @OneToMany(mappedBy = "room", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private List<Message> messages;
+    private List<Message> messages;*/
 
 
 }

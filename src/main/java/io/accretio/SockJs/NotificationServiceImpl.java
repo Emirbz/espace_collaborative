@@ -36,10 +36,11 @@ public class NotificationServiceImpl implements NotificationService {
         LOG.info("A socket was created for "+ event.socket().uri());
         bridgeEvents.put("admin", event);
         JsonObject jsonObject = new JsonObject();
+       // JsonObject jsonObject = new JsonObject();
         jsonObject.put("address", "chat.to.client");
 
 
-        event.socket().write(newMessage("Jhon Joined"));
+       // event.socket().write(newMessage("Jhon Joined"));
 
         //event.socket().write(newMessage("Welcome "+ "kkkkkk"));
         //eventBus.publish("out", new JsonObject().put("body", "Notification " + "admin" + " joined").toString());
@@ -51,7 +52,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         LOG.info("A socket send "+ event.getRawMessage());
         JsonObject jsonObject = event.getRawMessage();
+
         jsonObject.put("body", jsonObject.getString("body"));
+        jsonObject.put("user", "Amir Ben Zineb");
+        jsonObject.put("user_img", "https://i.ibb.co/ncRPhQ9/66206883-10219342242417601-8507541653085487104-o.jpg?fbclid=IwAR1JncqNup_G0ciuTvrV7gHZ8iGlDihNntr-_ClfVz6nA43yLzWMIfjERJ8");
        // jsonObject.put("timestamp", timestamp);
         eventBus.publish("chat.to.client", jsonObject);
 

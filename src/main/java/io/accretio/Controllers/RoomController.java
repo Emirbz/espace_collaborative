@@ -3,8 +3,11 @@ package io.accretio.Controllers;
 import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.Room;
 import io.accretio.Services.RoomService;
+import io.quarkus.security.Authenticated;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;

@@ -1,16 +1,21 @@
 package io.accretio.Controllers;
 
+import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.User;
 import io.accretio.Services.UserService;
+import io.quarkus.security.identity.SecurityIdentity;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.Principal;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,16 +28,37 @@ public class UserController {
 
     @Inject
     private UserService userService;
+    @Inject
+    SecurityIdentity identity;
+
+    @GET
+    @Path("/me")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response me() {
+        Principal caller =  identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none"))
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+
+
+        return Response.ok(userService.findUserByUsername(userName)).status(200).build();
+    }
 
 
     @POST
     @Produces("application/json")
+
     public Response addUser(User user){
         userService.addUser(user);
         return Response.ok(user).status(201).build();
     }
     @GET
     @Produces("application/json")
+    @NoCache
+    @PermitAll
     public Response getUsers(){
         List<User> user = userService.getUser();
         return Response.ok(user).build();

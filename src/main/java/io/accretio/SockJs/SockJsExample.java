@@ -49,9 +49,13 @@ public class SockJsExample {
 
     public void init(@Observes Router router) {
         vertx.eventBus().consumer("chat.to.server", (Message<JsonObject> message) -> {
-            String timestamp = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date.from(Instant.now()));
+       //     String timestamp = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date.from(Instant.now()));
 
-            vertx.eventBus().publish("chat.to.client", message.body() );
+            if (message.body() instanceof JsonObject)
+            {
+                vertx.eventBus().publish("chat.to.client", message.body());
+            }
+
             LOG.info(message.body());
         });
 
@@ -82,7 +86,7 @@ public class SockJsExample {
 
         });*/
         router.route("/ws/chat/*").handler(eventBusHandler(this.eventBus));
-        router.route().handler(StaticHandler.create().setCachingEnabled(false));
+     //   router.route().handler(StaticHandler.create().setCachingEnabled(false));
 
 
 
