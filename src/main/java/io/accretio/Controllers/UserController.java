@@ -67,7 +67,7 @@ public class UserController {
     @PUT
     @Path("{id}")
     @Transactional
-    public Response updateUser(@PathParam Integer id, User user) {
+    public Response updateUser(@PathParam String id, User user) {
         User entity = userService.getSigneUser(id);
 
 
@@ -84,7 +84,7 @@ public class UserController {
 
     @GET
     @Path("{id}")
-    public Response getSingle(@PathParam Integer id) {
+    public Response getSingle(@PathParam String id) {
         User entity = userService.getSigneUser(id);
         if (entity == null) {
             return NotFoundException.NotFoundResponse("User with id "+id+" not found");
@@ -104,7 +104,7 @@ public class UserController {
     @DELETE
     @Path("{id}")
     @Transactional
-    public Response deleteUser(@PathParam Integer id) {
+    public Response deleteUser(@PathParam String  id) {
         User entity = userService.getSigneUser(id);
 
         if (entity == null) {

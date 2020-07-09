@@ -43,7 +43,7 @@ public class UserService {
         return userRepository.find("username", username).firstResult();
     }
 
-    public void updateUser(int id, User user) {
+    public void updateUser(String id, User user) {
         userRepository.updateUser(id, user);
 
 
@@ -55,7 +55,7 @@ public class UserService {
     }
 
 
-    public User getSigneUser(long id) {
+    public User getSigneUser(String id) {
         return userRepository.findById(id);
     }
 }

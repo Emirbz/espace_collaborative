@@ -1,8 +1,12 @@
 package io.accretio.SockJs;
 
+import io.accretio.Utils.FileUploader;
+import io.minio.errors.*;
 import io.quarkus.security.identity.IdentityProviderManager;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.BridgeEventType;
@@ -17,15 +21,22 @@ import org.jboss.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.json.JsonWriter;
 import javax.websocket.*;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.vertx.core.Vertx.vertx;
+
 @ApplicationScoped
-public class SockJsExample {
+public class  SockJsExample {
     private static final Logger LOG = Logger.getLogger(SockJsExample.class);
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
@@ -36,23 +47,66 @@ public class SockJsExample {
     private String user ;
 
 
+
     EventBus eventBus;
 
     @Inject
     public SockJsExample(IdentityProviderManager identityProviderManager, NotificationService notificationService, Vertx vertx) {
+       /* EventBusOptions eventBusOptions = new EventBusOptions();
+        eventBusOptions.setReceiveBufferSize(Integer.MAX_VALUE);*/
         this.identityProviderManager = identityProviderManager;
         this.notificationService = notificationService;
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
+
     }
 
 
     public void init(@Observes Router router) {
         vertx.eventBus().consumer("chat.to.server", (Message<JsonObject> message) -> {
-       //     String timestamp = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date.from(Instant.now()));
+            long timestamp = new Date().getTime() / 1000;
 
             if (message.body() instanceof JsonObject)
             {
+                message.body().put("timestamp",timestamp);
+
+                if (message.body().getString("type").equals("TEXT")) {
+                    message.body().put("body", (message.body().getString("body")));
+                    message.body().put("type", "TEXT");
+                    message.body().put("file","");
+
+                }
+                else if (message.body().getString("type").equals("REACTION")) {
+                    message.body().put("body", (message.body().getString("body")));
+
+                    message.body().put("type", "REACTION");
+                    message.body().put("file","");
+
+                }
+                else if (message.body().getString("type").equals("VOTE")) {
+                    message.body().put("body", (message.body().getString("body")));
+
+                    message.body().put("type", "VOTE");
+                    message.body().put("file","");
+
+                }
+               else if (message.body().getString("type").equals("SONDAGE")) {
+                    message.body().put("body", (message.body().getString("body")));
+
+                    message.body().put("type", "SONDAGE");
+                    message.body().put("file","");
+
+                }
+                else if (message.body().getString("type").equals("IMAGE")) {
+                    try {
+                        message.body().put("file", new FileUploader().addImage(message.body().getString("file")));
+                    } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException | InvalidResponseException | InternalException | XmlParserException | InvalidBucketNameException | ErrorResponseException | RegionConflictException e) {
+                        e.printStackTrace();
+                    }
+                    message.body().put("type", "IMAGE");
+                    message.body().put("body","");
+                }
+
                 vertx.eventBus().publish("chat.to.client", message.body());
             }
 
@@ -86,7 +140,7 @@ public class SockJsExample {
 
         });*/
         router.route("/ws/chat/*").handler(eventBusHandler(this.eventBus));
-     //   router.route().handler(StaticHandler.create().setCachingEnabled(false));
+       // router.route().handler(StaticHandler.create().setCachingEnabled(false));
 
 
 

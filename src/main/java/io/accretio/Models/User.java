@@ -1,12 +1,12 @@
 package io.accretio.Models;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.security.identity.SecurityIdentity;
 import org.jboss.resteasy.spi.touri.MappedBy;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -15,8 +15,8 @@ import java.util.Set;
 
 @Entity
 @Table
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "id")
 public class User extends PanacheEntityBase {
+
 
 
 
@@ -29,6 +29,14 @@ public class User extends PanacheEntityBase {
 
     @Lob
     private String image;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getId() {
         return id;
@@ -106,9 +114,9 @@ public  User()
                 '}';
     }
 
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<Room> rooms = new HashSet<>();
-
 
 
 
@@ -130,17 +138,11 @@ public  User()
         return Objects.hash(id, firstName, lastName, email, image);
     }
 
-  /*   public List<Message> getMessages() {
-        return messages;
-    }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private Set<Message> messages;
 
 
-   @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private List<Message> messages;
-*/
+
 
 }

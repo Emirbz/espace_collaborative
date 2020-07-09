@@ -1,6 +1,14 @@
 package io.accretio.SockJs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.eventbus.AllowConcurrentEvents;
+import io.accretio.Controllers.MessageController;
+import io.accretio.Models.Message;
+import io.accretio.Models.Room;
+import io.accretio.Models.User;
+import io.accretio.Services.MessageService;
+import io.accretio.Utils.FileUploader;
+import io.minio.errors.*;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.sockjs.BridgeEvent;
@@ -8,7 +16,12 @@ import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -18,6 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class NotificationServiceImpl implements NotificationService {
 
+    @Inject
+    MessageService messageService;
+
+
     private static final String PREFERRED_USERNAME = "username";
     private Map<String, BridgeEvent> bridgeEvents = new ConcurrentHashMap<>();
     private static final Logger LOG = Logger.getLogger(NotificationService.class);
@@ -25,15 +42,19 @@ public class NotificationServiceImpl implements NotificationService {
     private final EventBus eventBus;
     private ObjectMapper objectMapper;
 
+
+
     @Inject
     public NotificationServiceImpl( EventBus eventBus) {
+
         this.eventBus = eventBus;
         objectMapper = new ObjectMapper();
     }
 
+
     @Override
     public void onOpen(BridgeEvent event, EventBus eventBus) {
-        LOG.info("A socket was created for "+ event.socket().uri());
+
         bridgeEvents.put("admin", event);
         JsonObject jsonObject = new JsonObject();
        // JsonObject jsonObject = new JsonObject();
@@ -48,16 +69,85 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void onMessage(BridgeEvent event, EventBus eventBus) {
-        String timestamp = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date.from(Instant.now()));
+        long timestamp = new Date().getTime() / 1000;
 
-        LOG.info("A socket send "+ event.getRawMessage());
+
+//        LOG.info("A socket send "+ event.getRawMessage());
+
         JsonObject jsonObject = event.getRawMessage();
 
-        jsonObject.put("body", jsonObject.getString("body"));
-        jsonObject.put("user", "Amir Ben Zineb");
-        jsonObject.put("user_img", "https://i.ibb.co/ncRPhQ9/66206883-10219342242417601-8507541653085487104-o.jpg?fbclid=IwAR1JncqNup_G0ciuTvrV7gHZ8iGlDihNntr-_ClfVz6nA43yLzWMIfjERJ8");
-       // jsonObject.put("timestamp", timestamp);
+        JsonObject frontBody =  jsonObject.getJsonObject("body");
+        System.out.println(frontBody.getString("type"));
+        if (frontBody.getString("type").equals("TEXT")) {
+         jsonObject.put("body", (frontBody.getString("body")));
+         jsonObject.put("type", "TEXT");
+         jsonObject.put("file","");
+
+        }
+        else if (frontBody.getString("type").equals("REACTION")) {
+            jsonObject.put("body", (frontBody.getString("body")));
+            jsonObject.put("type", "REACTION");
+            jsonObject.put("file","");
+
+        }
+        else if (frontBody.getString("type").equals("TYPING")) {
+            jsonObject.put("body", (frontBody.getString("body")));
+            jsonObject.put("type", "TYPING");
+            jsonObject.put("file", "");
+        }
+        else if (frontBody.getString("type").equals("VOTE")) {
+            jsonObject.put("body", (frontBody.getString("body")));
+            jsonObject.put("type", "VOTE");
+            jsonObject.put("file", "");
+        }
+        else if (frontBody.getString("type").equals("SONDAGE")) {
+            jsonObject.put("body", (frontBody.getJsonObject("body")));
+            jsonObject.put("type", "SONDAGE");
+            jsonObject.put("file", "");
+        }
+
+
+
+        else if (frontBody.getString("type").equals("IMAGE")) {
+            try {
+                jsonObject.put("file", new FileUploader().addImage(frontBody.getString("file")));
+            } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException | InvalidResponseException | InternalException | XmlParserException | InvalidBucketNameException | ErrorResponseException | RegionConflictException e) {
+                e.printStackTrace();
+            }
+            jsonObject.put("type", "IMAGE");
+            jsonObject.put("body","");
+            }
+
+
+
+
+        jsonObject.put("firstName", frontBody.getString("firstName"));
+        jsonObject.put("choix_id", frontBody.getInteger("choix_id"));
+        jsonObject.put("lastName", frontBody.getString("lastName"));
+        jsonObject.put("user_img", frontBody.getString("user_img"));
+        jsonObject.put("room_id", frontBody.getInteger("room_id"));
+        jsonObject.put("message_id", frontBody.getInteger("message_id"));
+        jsonObject.put("user_id", frontBody.getString("user_id"));
+
+        jsonObject.put("timestamp", timestamp);
+
+       /*Message message = new Message();
+        message.setBody(frontBody.getString("body"));
+        Room room = new Room();
+        room.setId(frontBody.getInteger("room_id"));
+        message.setRoom(room);
+        message.setType(Message.type.TEXT);
+        User user = new User();
+        user.setId(frontBody.getString("user_id"));
+        message.setUser(user);
+
+
+
+        messageService.addMessage(message);*/
         eventBus.publish("chat.to.client", jsonObject);
+
+        messageService.addMessage(new Message("test eventbus","", Message.type.TEXT,null,null,null,null,null));
+
 
 
     }
@@ -73,5 +163,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .put("address", "chat.to.client")
                 .toString();
     }
+
+
 
 }
