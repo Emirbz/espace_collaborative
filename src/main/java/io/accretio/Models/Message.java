@@ -18,7 +18,8 @@ public class Message extends PanacheEntityBase {
         IMAGE,
         AUDIO,
         FILE,
-        SONDAGE
+        SONDAGE,
+        VIDEO
     }
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
