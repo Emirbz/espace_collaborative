@@ -1,12 +1,11 @@
 package io.accretio.Repository;
 
-import io.accretio.Models.User;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-import io.quarkus.panache.common.Parameters;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.util.List;
+
+import io.accretio.Models.User;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 
 @ApplicationScoped

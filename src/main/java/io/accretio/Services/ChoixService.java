@@ -1,27 +1,22 @@
 package io.accretio.Services;
 
-import io.accretio.Models.Choix;
-import io.accretio.Models.Room;
-import io.accretio.Models.Sondage;
-import io.accretio.Repository.ChoixRepository;
-import io.accretio.Repository.SondageRepository;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.List;
+
+import io.accretio.Models.Choix;
+import io.accretio.Repository.ChoixRepository;
 
 @ApplicationScoped
 public class ChoixService {
 
-
     @Inject
     private ChoixRepository choixRepository;
-
 
     public void addChoix(Choix choix) {
 
         choixRepository.persist(choix);
-
 
     }
 
@@ -32,10 +27,7 @@ public class ChoixService {
 
     public Choix getSingleChoix(long id) {
 
-
         return choixRepository.findById(id);
     }
-
-
 
 }

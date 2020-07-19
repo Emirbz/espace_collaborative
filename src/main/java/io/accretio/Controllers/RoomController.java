@@ -1,29 +1,27 @@
 package io.accretio.Controllers;
 
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.annotations.jaxrs.PathParam;
+
 import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Services.RoomService;
-import io.accretio.Utils.FileUploader;
-import io.minio.errors.*;
-import io.quarkus.security.Authenticated;
-import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Path("/room")

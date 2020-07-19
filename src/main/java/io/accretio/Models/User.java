@@ -1,16 +1,22 @@
 package io.accretio.Models;
 
-import com.fasterxml.jackson.annotation.*;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import io.quarkus.security.identity.SecurityIdentity;
-import org.jboss.resteasy.spi.touri.MappedBy;
-
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.security.identity.SecurityIdentity;
 
 
 @Entity
