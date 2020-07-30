@@ -54,65 +54,55 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void onOpen(BridgeEvent event, EventBus eventBus) {
 
-        bridgeEvents.put("admin", event);
-        JsonObject jsonObject = new JsonObject();
-        // JsonObject jsonObject = new JsonObject();
-        jsonObject.put("address", "chat.to.client");
+   //     bridgeEvents.put("admin", event);
+     //   JsonObject jsonObject = new JsonObject();
+     //   jsonObject.put("address", "chat.to.client");
 
-        // event.socket().write(newMessage("Jhon Joined"));
 
-        // event.socket().write(newMessage("Welcome "+ "kkkkkk"));
-        // eventBus.publish("out", new JsonObject().put("body", "Notification " +
-        // "admin" + " joined").toString());
     }
 
     @Override
     public void onMessage(BridgeEvent event, EventBus eventBus) {
-        long timestamp = new Date().getTime() / 1000;
-
-        // LOG.info("A socket send "+ event.getRawMessage());
-
         JsonObject jsonObject = event.getRawMessage();
-
         JsonObject frontBody = jsonObject.getJsonObject("body");
-        System.out.println(frontBody.getString("type"));
-        if (frontBody.getString("type").equals("TEXT")) {
-            jsonObject.put("body", (frontBody.getString("body")));
-            jsonObject.put("type", "TEXT");
-            jsonObject.put("file", "");
-
-        } else if (frontBody.getString("type").equals("REACTION")) {
-            jsonObject.put("body", (frontBody.getString("body")));
-            jsonObject.put("type", "REACTION");
-            jsonObject.put("file", "");
-
-        } else if (frontBody.getString("type").equals("TYPING")) {
-            jsonObject.put("body", (frontBody.getString("body")));
-            jsonObject.put("type", "TYPING");
-            jsonObject.put("file", "");
-        } else if (frontBody.getString("type").equals("VOTE")) {
-            jsonObject.put("body", (frontBody.getString("body")));
-            jsonObject.put("type", "VOTE");
-            jsonObject.put("file", "");
-        } else if (frontBody.getString("type").equals("SONDAGE")) {
-            jsonObject.put("body", (frontBody.getJsonObject("body")));
-            jsonObject.put("type", "SONDAGE");
-            jsonObject.put("file", "");
+        String roomId  = frontBody.getInteger("room_id").toString();
+        String type = frontBody.getString("type");
+        switch (type) {
+            case "TEXT":
+            case "REACTION":
+            case "TYPING":
+            case "VOTE":
+                jsonObject.put("body", (frontBody.getString("body")));
+                jsonObject.put("file", "");
+                break;
+            case "SONDAGE":
+                jsonObject.put("body", (frontBody.getJsonObject("body")));
+                jsonObject.put("file", "");
+                break;
+            case "IMAGE":
+                try {
+                    jsonObject.put("file", new FileUploader().addImage(frontBody.getString("file")));
+                } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException
+                        | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException
+                        | InvalidResponseException | InternalException | XmlParserException | InvalidBucketNameException
+                        | ErrorResponseException | RegionConflictException e) {
+                    e.printStackTrace();
+                }
+                jsonObject.put("type", "IMAGE");
+                jsonObject.put("body", "");
+                break;
         }
+        setSocketValues(jsonObject, frontBody, type,eventBus,roomId);
 
-        else if (frontBody.getString("type").equals("IMAGE")) {
-            try {
-                jsonObject.put("file", new FileUploader().addImage(frontBody.getString("file")));
-            } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException
-                    | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException
-                    | InvalidResponseException | InternalException | XmlParserException | InvalidBucketNameException
-                    | ErrorResponseException | RegionConflictException e) {
-                e.printStackTrace();
-            }
-            jsonObject.put("type", "IMAGE");
-            jsonObject.put("body", "");
-        }
 
+
+
+
+    }
+
+    private void setSocketValues(JsonObject jsonObject, JsonObject frontBody, String type, EventBus eventBus, String roomId) {
+        long timestamp = new Date().getTime() / 1000;
+        jsonObject.put("type", type);
         jsonObject.put("firstName", frontBody.getString("firstName"));
         jsonObject.put("choix_id", frontBody.getInteger("choix_id"));
         jsonObject.put("lastName", frontBody.getString("lastName"));
@@ -120,23 +110,9 @@ public class NotificationServiceImpl implements NotificationService {
         jsonObject.put("room_id", frontBody.getInteger("room_id"));
         jsonObject.put("message_id", frontBody.getInteger("message_id"));
         jsonObject.put("user_id", frontBody.getString("user_id"));
-
         jsonObject.put("timestamp", timestamp);
-
-        /*
-         * Message message = new Message();
-         * message.setBody(frontBody.getString("body")); Room room = new Room();
-         * room.setId(frontBody.getInteger("room_id")); message.setRoom(room);
-         * message.setType(Message.type.TEXT); User user = new User();
-         * user.setId(frontBody.getString("user_id")); message.setUser(user);
-         * 
-         * 
-         * 
-         * messageService.addMessage(message);
-         */
-        eventBus.publish("chat.to.client", jsonObject);
-
-        messageService.addMessage(new Message("test eventbus", "", Message.type.TEXT, null, null, null, null, null));
+        LOG.info("Publishing from web to room with id : "+roomId);
+        eventBus.publish("chat.to.client/"+roomId, jsonObject);
 
     }
 
@@ -145,8 +121,5 @@ public class NotificationServiceImpl implements NotificationService {
         bridgeEvents.remove("admin");
     }
 
-    private String newMessage(String message) {
-        return new JsonObject().put("body", message).put("address", "chat.to.client").toString();
-    }
 
 }

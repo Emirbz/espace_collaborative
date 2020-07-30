@@ -60,7 +60,7 @@ public class ChoixController {
         });
 
         choix.getUsers().add(user);
-        return Response.ok(choix).status(201).build();
+        return Response.ok(sondage).status(201).build();
     }
 
 
