@@ -1,13 +1,24 @@
 package io.accretio.Models;
 
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
-import java.util.Set;
-
-import javax.persistence.*;
 
 @Table
 @Entity
@@ -19,8 +30,10 @@ public class Topic extends PanacheEntityBase {
     @Id
     private long id;
 
+    private String title;
+
     @Lob
-    private String question;
+    private String description;
 
     private long timestamp;
 
@@ -44,14 +57,6 @@ public class Topic extends PanacheEntityBase {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
     }
 
     public TopicCategory getTopicCategory() {
@@ -110,4 +115,21 @@ public class Topic extends PanacheEntityBase {
     public void setCountReplies(int countReplies) {
         this.countReplies = countReplies;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 }
