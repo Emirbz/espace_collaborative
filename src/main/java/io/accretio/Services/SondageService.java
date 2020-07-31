@@ -14,7 +14,7 @@ import io.accretio.Repository.SondageRepository;
 public class SondageService {
 
     @Inject
-    private SondageRepository sondageRepository;
+    SondageRepository sondageRepository;
 
     public void addSondage(Message sondage) {
 

@@ -1,20 +1,11 @@
 package io.accretio.Models;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -22,8 +13,6 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Table
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-@JsonFilter("replies")
 public class Topic extends PanacheEntityBase {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,18 +24,23 @@ public class Topic extends PanacheEntityBase {
     @Lob
     private String description;
 
-    private long timestamp;
+    private long timestamp= new Date().getTime() / 1000;;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.Active;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private TopicCategory topicCategory;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private User user;
 
-    @OneToMany(mappedBy = "topic", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private Set<Reply> replies;
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(name = "topic_tags",
+            joinColumns = @JoinColumn(name = "topic_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
+
+   /* @OneToMany(mappedBy = "topic", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private Set<Reply> replies;*/
 
     @Transient
     private int countReplies;
@@ -59,12 +53,12 @@ public class Topic extends PanacheEntityBase {
         this.id = id;
     }
 
-    public TopicCategory getTopicCategory() {
-        return topicCategory;
+    public Set<Tag> getTags() {
+        return tags;
     }
 
-    public void setTopicCategory(TopicCategory topicCategory) {
-        this.topicCategory = topicCategory;
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 
     public User getUser() {
@@ -75,16 +69,13 @@ public class Topic extends PanacheEntityBase {
         this.user = user;
     }
 
-    public String getStatus() {
+
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public Topic() {
-        this.status = Status.Active.name();
     }
 
     public long getTimestamp() {
@@ -95,7 +86,7 @@ public class Topic extends PanacheEntityBase {
         this.timestamp = timestamp;
     }
 
-    public Set<Reply> getReplies() {
+  /*  public Set<Reply> getReplies() {
         this.setCountReplies(this.replies.size());
         return replies;
     }
@@ -103,7 +94,7 @@ public class Topic extends PanacheEntityBase {
     public void setReplies(Set<Reply> replies) {
         this.replies = replies;
     }
-
+*/
     public enum Status {
         Active, Inactive
     }
@@ -132,4 +123,17 @@ public class Topic extends PanacheEntityBase {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return "Topic{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", timestamp=" + timestamp +
+                ", status=" + status +
+                ", user=" + user +
+                ", tags=" + tags +
+                ", countReplies=" + countReplies +
+                '}';
+    }
 }

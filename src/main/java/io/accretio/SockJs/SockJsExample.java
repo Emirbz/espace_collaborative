@@ -55,11 +55,9 @@ public class SockJsExample {
             roomId = routingContext.request().getParam("room_id");
 
             vertx.eventBus().consumer("chat.to.server", (Message<JsonObject> message) -> {
-                LOG.info("Heyyyyyyyy");
-
-                String type = message.body().getString("type");
 
                 if (message.body() instanceof JsonObject) {
+                    String type = message.body().getString("type");
                     LOG.info("Mobile Recived");
                     switch (type) {
                         case "TEXT":
@@ -86,9 +84,9 @@ public class SockJsExample {
                 }
 
             });
-
-            this.bridgeOption.setBridgeOptionMobile("chat.to.server" ,"chat.to.client/"+roomId );
-            this.bridgeOption.setBridgeOptionWeb("chat.to.server" ,"chat.to.client/"+roomId );
+                LOG.info("roomId = " +roomId );
+            this.bridgeOption.setBridgeOptionMobile("chat.to.server" ,"chat.to.client/"+roomId);
+            this.bridgeOption.setBridgeOptionWeb("chat.to.server" ,"chat.to.client/"+roomId);
 
             TcpEventBusBridge bridge = TcpEventBusBridge.create(vertx,
                     this.bridgeOption.getBridgeOptionMobile());

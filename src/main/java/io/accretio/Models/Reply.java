@@ -16,8 +16,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
-@Table
-@Entity
+//@Table
+//@Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Reply extends PanacheEntityBase {
 

@@ -12,7 +12,7 @@ import io.accretio.Repository.ReactionRepository;
 public class ReactionService {
 
     @Inject
-    private ReactionRepository reactionRepository;
+    ReactionRepository reactionRepository;
 
     public void addReaction(Reaction reaction) {
         Reaction r = reactionRepository.checkUserReaction(reaction);

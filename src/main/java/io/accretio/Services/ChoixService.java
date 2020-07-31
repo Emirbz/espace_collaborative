@@ -12,7 +12,7 @@ import io.accretio.Repository.ChoixRepository;
 public class ChoixService {
 
     @Inject
-    private ChoixRepository choixRepository;
+    ChoixRepository choixRepository;
 
     public void addChoix(Choix choix) {
 

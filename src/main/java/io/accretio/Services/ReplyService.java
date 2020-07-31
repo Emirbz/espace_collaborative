@@ -13,7 +13,7 @@ import java.util.List;
 public class ReplyService {
 
     @Inject
-    private ReplyRepository replyRepository;
+    ReplyRepository replyRepository;
 
 
     public List<Reply> getReplies() {

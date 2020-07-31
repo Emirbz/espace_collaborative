@@ -30,7 +30,7 @@ import io.quarkus.panache.common.Sort;
 public class MessageService {
 
     @Inject
-    private MessageRepository messageRepository;
+    MessageRepository messageRepository;
 
     public List<Message> getMessages() {
         return messageRepository.listAll();

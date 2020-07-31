@@ -1,27 +1,18 @@
 package io.accretio.Models;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Table
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class TopicCategory extends PanacheEntityBase {
+public class Tag extends PanacheEntityBase {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -29,11 +20,6 @@ public class TopicCategory extends PanacheEntityBase {
 
     private String name;
 
-    @OneToMany(mappedBy = "topicCategory", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private Set<Topic> topics;
-
-    @Transient
-    private int countTopics;
 
     public long getId() {
         return id;
@@ -51,12 +37,20 @@ public class TopicCategory extends PanacheEntityBase {
         this.name = name;
     }
 
-    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "tags")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Set<Topic> topics = new HashSet<>();
+
+    @Transient
+    private int countTopics;
+
+
     public Set<Topic> getTopics() {
         return topics;
     }
 
     public void setTopics(Set<Topic> topics) {
+        this.countTopics = topics.size();
         this.topics = topics;
     }
 
@@ -68,4 +62,13 @@ public class TopicCategory extends PanacheEntityBase {
         this.countTopics = countTopics;
     }
 
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", countTopics=" + countTopics +
+                ", topics=" + topics +
+                '}';
+    }
 }

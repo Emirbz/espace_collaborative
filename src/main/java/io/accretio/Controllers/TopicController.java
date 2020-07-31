@@ -2,6 +2,7 @@ package io.accretio.Controllers;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -21,8 +22,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import io.accretio.Models.Topic;
-import io.accretio.Models.TopicCategory;
-import io.accretio.Services.TopicCategoryService;
+import io.accretio.Models.Tag;
 import io.accretio.Services.TopicService;
 
 @ApplicationScoped
@@ -32,9 +32,7 @@ import io.accretio.Services.TopicService;
 public class TopicController {
 
     @Inject
-    private TopicService topicService;
-    @Inject
-    private TopicCategoryService topicCategoryService;
+    TopicService topicService;
 
     @POST
     @Produces("application/json")
@@ -44,20 +42,11 @@ public class TopicController {
         return Response.ok(topic).status(201).build();
     }
 
-    @GET
-    @Path("category/{id}")
+    @POST
+    @Path("/tag")
     @Produces("application/json")
-    public Response getTopicsByCategory(@PathParam("id") long id) throws JsonProcessingException {
-        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-        filterProvider.addFilter("replies", SimpleBeanPropertyFilter.serializeAllExcept("replies"));
-
-        TopicCategory topicCategory = topicCategoryService.getCategory(id);
-        List<Topic> topics = topicService.getTopicsByCategory(topicCategory);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setFilterProvider(filterProvider);
-        objectMapper.writeValueAsString(topics);
-
+    public Response getTopicsByTags(@Nullable List<Tag> tags)  {
+        List<Topic> topics = topicService.getTopicsByTags(tags);
         return Response.ok(topics).build();
     }
 
@@ -68,7 +57,6 @@ public class TopicController {
         SimpleFilterProvider filterProvider = new SimpleFilterProvider();
         filterProvider.addFilter("replies", SimpleBeanPropertyFilter.serializeAll());
         Topic topic = topicService.getTopicById(id);
-
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setFilterProvider(filterProvider);
         objectMapper.writeValueAsString(topic);

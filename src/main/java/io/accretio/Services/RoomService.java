@@ -28,7 +28,7 @@ import io.minio.errors.XmlParserException;
 @ApplicationScoped
 public class RoomService {
     @Inject
-    private RoomRepository roomRepository;
+    RoomRepository roomRepository;
 
     public List<Room> getRoom() {
         return roomRepository.listAll();

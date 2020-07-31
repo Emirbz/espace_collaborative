@@ -63,8 +63,10 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void onMessage(BridgeEvent event, EventBus eventBus) {
+
         JsonObject jsonObject = event.getRawMessage();
-        JsonObject frontBody = jsonObject.getJsonObject("body");
+        JsonObject frontBody = new JsonObject(jsonObject.getString("body"));
+
         String roomId  = frontBody.getInteger("room_id").toString();
         String type = frontBody.getString("type");
         switch (type) {
