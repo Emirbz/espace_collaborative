@@ -15,6 +15,8 @@ import javax.ws.rs.core.Response;
 import io.accretio.Models.Reply;
 import io.accretio.Services.ReplyService;
 
+import java.util.List;
+
 @ApplicationScoped
 @Path("reply")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,7 +24,7 @@ import io.accretio.Services.ReplyService;
 public class ReplyController {
 
     @Inject
-    private ReplyService replyService;
+    ReplyService replyService;
 
     @POST
     @Produces("application/json")
@@ -33,12 +35,20 @@ public class ReplyController {
     }
 
 
-    @GET
+   /* @GET
     @Path("{id}")
     @Produces("application/json")
     public Response getreplyById(@PathParam("id") long id) {
         Reply reply = replyService.getReplyById(id);
         return Response.ok(reply).build();
+    }*/
+
+    @GET
+    @Path("/topic/{id}")
+    @Produces("application/json")
+    public Response getreplyByTopic(@PathParam("id") Integer id) {
+        List<Reply> replies  = replyService.getRepliesByTopic(id);
+        return Response.ok(replies).build();
     }
 
 }

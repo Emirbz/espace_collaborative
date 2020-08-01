@@ -39,7 +39,7 @@ public class ReplyService {
     }
 
 
-    public List<Reply> getRepliesByTopic(Topic topic) {
-        return replyRepository.list("topic", topic);
+    public List<Reply> getRepliesByTopic(Integer id) {
+        return replyRepository.getRepliesByTopic(id);
     }
 }

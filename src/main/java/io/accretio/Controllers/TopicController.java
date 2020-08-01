@@ -1,29 +1,21 @@
 package io.accretio.Controllers;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import io.accretio.Models.Tag;
+import io.accretio.Models.Topic;
+import io.accretio.Services.TopicService;
 
 import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-
-import io.accretio.Models.Topic;
-import io.accretio.Models.Tag;
-import io.accretio.Services.TopicService;
+import java.util.List;
 
 @ApplicationScoped
 @Path("topic")
@@ -54,12 +46,7 @@ public class TopicController {
     @Path("{id}")
     @Produces("application/json")
     public Response getTopicById(@PathParam("id") long id) throws JsonProcessingException {
-        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-        filterProvider.addFilter("replies", SimpleBeanPropertyFilter.serializeAll());
         Topic topic = topicService.getTopicById(id);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setFilterProvider(filterProvider);
-        objectMapper.writeValueAsString(topic);
         return Response.ok(topic).build();
     }
 

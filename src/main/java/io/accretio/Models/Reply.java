@@ -12,12 +12,15 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
-//@Table
-//@Entity
+import java.util.Date;
+
+@Table
+@Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Reply extends PanacheEntityBase {
 
@@ -28,7 +31,7 @@ public class Reply extends PanacheEntityBase {
     @Lob
     private String reply;
 
-    private long timestamp;
+    private long timestamp = new Date().getTime() / 1000;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private User user;
@@ -60,7 +63,7 @@ public class Reply extends PanacheEntityBase {
         this.user = user;
     }
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public Topic getTopic() {
         return topic;
     }

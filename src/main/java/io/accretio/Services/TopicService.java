@@ -30,7 +30,8 @@ public class TopicService {
     {
         assert tags != null;
         if (tags.size()==0) {
-             return topicRepository.listAll();
+
+            return setCountRepliesList(topicRepository.listAll());
          }
          else {
              Set<Topic> filtredTopics = new HashSet<>();
@@ -38,9 +39,25 @@ public class TopicService {
                  Tag newTag= tagRepository.findById(tag.getId());
                  filtredTopics.addAll(newTag.getTopics());
              });
-             return new ArrayList<>(filtredTopics);
+             return setCountRepliesList(new ArrayList<>(filtredTopics));
          }
 
+
+    }
+    public List<Topic> setCountRepliesList(List<Topic> topics)
+    {
+        for (Topic topic : topics) {
+            setCountReplies(topic);
+        }
+        return topics;
+    }
+
+
+
+    public Topic setCountReplies(Topic topic)
+    {
+        topic.setCountReplies(topic.getReplies().size());
+        return topic;
 
     }
 
@@ -68,12 +85,9 @@ public class TopicService {
     }
 
     public Topic getTopicById(long id) {
-        return topicRepository.findById(id);
+        return setCountReplies(topicRepository.findById(id));
     }
 
-    public List<Topic> getTopicsByCategory(Tag tag) {
-        return topicRepository.list("topicCategory", tag);
-    }
 
     public void setInactive(Topic topic) {
         topicRepository.update("status = ?1 where id = ?2", Topic.Status.Inactive.name(), topic.getId());

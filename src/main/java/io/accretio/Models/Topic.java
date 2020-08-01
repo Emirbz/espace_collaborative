@@ -1,15 +1,13 @@
 package io.accretio.Models;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
+import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Table
 @Entity
@@ -24,7 +22,7 @@ public class Topic extends PanacheEntityBase {
     @Lob
     private String description;
 
-    private long timestamp= new Date().getTime() / 1000;;
+    private long timestamp = new Date().getTime() / 1000;
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.Active;
@@ -39,8 +37,9 @@ public class Topic extends PanacheEntityBase {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
-   /* @OneToMany(mappedBy = "topic", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private Set<Reply> replies;*/
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "topic", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private Set<Reply> replies;
 
     @Transient
     private int countReplies;
@@ -86,7 +85,7 @@ public class Topic extends PanacheEntityBase {
         this.timestamp = timestamp;
     }
 
-  /*  public Set<Reply> getReplies() {
+    public Set<Reply> getReplies() {
         this.setCountReplies(this.replies.size());
         return replies;
     }
@@ -94,7 +93,7 @@ public class Topic extends PanacheEntityBase {
     public void setReplies(Set<Reply> replies) {
         this.replies = replies;
     }
-*/
+
     public enum Status {
         Active, Inactive
     }

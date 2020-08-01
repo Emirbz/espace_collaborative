@@ -11,7 +11,6 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Table
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Tag extends PanacheEntityBase {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
