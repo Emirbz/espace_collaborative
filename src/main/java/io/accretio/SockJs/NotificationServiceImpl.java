@@ -10,8 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.accretio.Services.SondageService;
 import org.jboss.logging.Logger;
 
 import io.accretio.Models.Message;
@@ -30,12 +32,15 @@ import io.minio.errors.XmlParserException;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.sockjs.BridgeEvent;
+import org.riversun.promise.Func;
+import org.riversun.promise.Promise;
+
 
 @Singleton
 public class NotificationServiceImpl implements NotificationService {
 
     @Inject
-    MessageService messageService;
+    SondageService sondageService;
 
     private static final String PREFERRED_USERNAME = "username";
     private Map<String, BridgeEvent> bridgeEvents = new ConcurrentHashMap<>();
@@ -78,8 +83,33 @@ public class NotificationServiceImpl implements NotificationService {
                 jsonObject.put("file", "");
                 break;
             case "SONDAGE":
-                jsonObject.put("body", (frontBody.getJsonObject("body")));
-                jsonObject.put("file", "");
+                try {
+                    Message sondage = objectMapper.readValue(frontBody.getString("body"),Message.class);
+                    Func function1 = (action, data) -> {
+                        new Thread(() -> {
+                            Message submittedSondage = sondageService.addSondageEventBus(sondage);
+                            action.resolve(submittedSondage);
+                        }).start();
+                    };
+
+                    Func function2 = (action, data) -> {
+                        jsonObject.put("body", objectMapper.writeValueAsString(data));
+                        jsonObject.put("file", "");
+                        setSocketValues(jsonObject, frontBody, type,eventBus,roomId);
+                        action.resolve();
+                    };
+
+                    Promise.resolve()
+                            .then(new Promise(function1))
+                            .then(new Promise(function2))
+                            .start();// start Promise operation
+
+
+
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case "IMAGE":
                 try {
@@ -94,7 +124,10 @@ public class NotificationServiceImpl implements NotificationService {
                 jsonObject.put("body", "");
                 break;
         }
-        setSocketValues(jsonObject, frontBody, type,eventBus,roomId);
+        if (!type.equals("SONDAGE"))
+        {
+            setSocketValues(jsonObject, frontBody, type,eventBus,roomId);
+        }
 
 
 
@@ -103,6 +136,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void setSocketValues(JsonObject jsonObject, JsonObject frontBody, String type, EventBus eventBus, String roomId) {
+        LOG.info("SetSocketValues");
         long timestamp = new Date().getTime() / 1000;
         jsonObject.put("type", type);
         jsonObject.put("firstName", frontBody.getString("firstName"));

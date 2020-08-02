@@ -91,19 +91,18 @@ public class Message extends PanacheEntityBase {
         this.room = roomId;
     }
 
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
 
-    @Column(name = "timestamp")
-    private Date timestamp;
-
-    public Date getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    private long timestamp = new Date().getTime() / 1000;
+
+
 
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -146,16 +145,6 @@ public class Message extends PanacheEntityBase {
         this.choix = choix;
     }
 
-    public Message(String body, String file, Message.type type, Date timestamp, Room room, User user, Set<Reaction> reactions, Set<Choix> choix) {
-        this.body = body;
-        this.file = file;
-        this.type = type;
-        this.timestamp = timestamp;
-        this.room = room;
-        this.user = user;
-        this.reactions = reactions;
-        this.choix = choix;
-    }
 
     public Message() {
     }

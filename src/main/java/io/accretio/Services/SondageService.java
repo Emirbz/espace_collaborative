@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import io.accretio.Models.Choix;
 import io.accretio.Models.Message;
@@ -25,6 +26,20 @@ public class SondageService {
         });
 
         sondageRepository.persist(sondage);
+
+    }
+
+    @Transactional
+    public Message addSondageEventBus(Message sondage) {
+
+        Set<Choix> choix = sondage.getChoix();
+        choix.forEach(c -> {
+            c.setMessage(sondage);
+            Choix.persist(c);
+        });
+
+        sondageRepository.persist(sondage);
+        return  sondage;
 
     }
 

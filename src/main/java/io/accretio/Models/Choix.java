@@ -67,13 +67,4 @@ public class Choix extends PanacheEntityBase {
     }
 
 
-    @Override
-    public String toString() {
-        return "Choix{" +
-                "id=" + id +
-                ", body='" + body + '\'' +
-                ", message=" + message +
-                ", users=" + users +
-                '}';
-    }
 }

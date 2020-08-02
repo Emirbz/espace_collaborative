@@ -32,6 +32,11 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>org.riversun</groupId>
+            <artifactId>java-promise</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-mysql</artifactId>
             <version>${quarkus.platform.version}</version>
@@ -88,7 +93,6 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-oidc</artifactId>
@@ -102,6 +106,7 @@
             <artifactId>quarkus-keycloak-adapter</artifactId>
             <version>1.0.0.Alpha1</version>
         </dependency>
+
     </dependencies>
 
     <build>
