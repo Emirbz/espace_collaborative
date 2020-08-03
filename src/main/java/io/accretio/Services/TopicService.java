@@ -22,22 +22,19 @@ public class TopicService {
     @Inject
     TagRepository tagRepository;
 
-    public List<Topic> getAllTopics() {
-        return topicRepository.listAll();
-    }
 
     public List<Topic> getTopicsByTags(@Nullable List<Tag> tags)
     {
         assert tags != null;
         if (tags.size()==0) {
 
-            return setCountRepliesList(topicRepository.listAll());
+            return setCountRepliesList(topicRepository.getAllTopics());
          }
          else {
              Set<Topic> filtredTopics = new HashSet<>();
              tags.forEach(tag -> {
                  Tag newTag= tagRepository.findById(tag.getId());
-                 filtredTopics.addAll(newTag.getTopics());
+                 filtredTopics.addAll(newTag.getTopics().stream().sorted(Comparator.comparing(Topic::getTimestamp)).collect(Collectors.toCollection(LinkedHashSet::new)));
              });
              return setCountRepliesList(new ArrayList<>(filtredTopics));
          }
@@ -85,7 +82,11 @@ public class TopicService {
     }
 
     public Topic getTopicById(long id) {
-        return setCountReplies(topicRepository.findById(id));
+        Topic topic = setCountReplies(topicRepository.findById(id));
+        long seen = topic.getSeen();
+        topicRepository.update("seen = ?1 where id = ?2", (seen+1),id);
+        topic.setSeen(seen+1);
+        return topic;
     }
 
 

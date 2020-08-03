@@ -101,6 +101,7 @@ public class SockJsExample {
     }
 
     private void setSocketValues(Message<JsonObject> message, String roomId, String type) {
+        //TODO timestamp
         long timestamp = new Date().getTime() / 1000;
         message.body().put("timestamp", timestamp);
         message.body().put("type", type);

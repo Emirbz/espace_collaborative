@@ -43,9 +43,10 @@ public class TopicController {
     }
 
     @GET
+    @Transactional
     @Path("{id}")
     @Produces("application/json")
-    public Response getTopicById(@PathParam("id") long id) throws JsonProcessingException {
+    public Response getTopicById(@PathParam("id") long id)  {
         Topic topic = topicService.getTopicById(id);
         return Response.ok(topic).build();
     }

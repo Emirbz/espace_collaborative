@@ -24,6 +24,17 @@ public class Topic extends PanacheEntityBase {
 
     private long timestamp = new Date().getTime() / 1000;
 
+
+    private long seen = 0 ;
+
+    public long getSeen() {
+        return seen;
+    }
+
+    public void setSeen(long seen) {
+        this.seen = seen;
+    }
+
     @Enumerated(EnumType.STRING)
     private Status status = Status.Active;
 

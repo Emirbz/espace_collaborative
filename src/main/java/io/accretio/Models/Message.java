@@ -99,7 +99,7 @@ public class Message extends PanacheEntityBase {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-
+//TODO timestamp ghalet
     private long timestamp = new Date().getTime() / 1000;
 
 
