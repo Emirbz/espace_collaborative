@@ -22,7 +22,7 @@ public class Topic extends PanacheEntityBase {
     @Lob
     private String description;
 
-    private long timestamp = new Date().getTime() / 1000;
+    private long timestamp = new Date().getTime() / 1000 ;
 
 
     private long seen = 0 ;

@@ -1,7 +1,11 @@
 package io.accretio.Controllers;
 
+import io.accretio.Errors.ForbiddenException;
 import io.accretio.Models.Reply;
+import io.accretio.Models.User;
 import io.accretio.Services.ReplyService;
+import io.accretio.Services.UserService;
+import io.quarkus.security.identity.SecurityIdentity;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,6 +13,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.Principal;
 import java.util.List;
 
 @ApplicationScoped
@@ -19,6 +24,10 @@ public class ReplyController {
 
     @Inject
     ReplyService replyService;
+    @Inject
+    SecurityIdentity identity;
+    @Inject
+    UserService userService;
 
     @POST
     @Produces("application/json")
@@ -43,7 +52,22 @@ public class ReplyController {
     @Produces("application/json")
     public Response getreplyByTopic(@PathParam("id") Integer id) {
         List<Reply> replies = replyService.getRepliesByTopic(id);
-        return Response.ok(replies).build();
+        return Response.ok(replies).status(200).build();
+    }
+
+    @PUT
+    @Path("/like/{id}")
+    @Transactional
+    public Response likeReply(@org.jboss.resteasy.annotations.jaxrs.PathParam Integer id) {
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        Reply reply =replyService.likeReply(id,userName);
+        return Response.ok(reply).build();
+
+
     }
 
 }

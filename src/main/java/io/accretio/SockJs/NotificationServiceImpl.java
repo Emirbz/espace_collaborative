@@ -137,8 +137,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void setSocketValues(JsonObject jsonObject, JsonObject frontBody, String type, EventBus eventBus, String roomId) {
         LOG.info("SetSocketValues");
-        //TODO timestamp
-        long timestamp = new Date().getTime() / 1000;
+        //TODO timestamp    
+        long timestamp = new Date().getTime() / 1000  ;
         jsonObject.put("type", type);
         jsonObject.put("firstName", frontBody.getString("firstName"));
         jsonObject.put("choix_id", frontBody.getInteger("choix_id"));

@@ -39,7 +39,7 @@ public class TopicController {
     @Produces("application/json")
     public Response getTopicsByTags(@Nullable List<Tag> tags)  {
         List<Topic> topics = topicService.getTopicsByTags(tags);
-        return Response.ok(topics).build();
+        return Response.ok(topics).status(200).build();
     }
 
     @GET
@@ -48,7 +48,7 @@ public class TopicController {
     @Produces("application/json")
     public Response getTopicById(@PathParam("id") long id)  {
         Topic topic = topicService.getTopicById(id);
-        return Response.ok(topic).build();
+        return Response.ok(topic).status(200).build();
     }
 
     @PUT

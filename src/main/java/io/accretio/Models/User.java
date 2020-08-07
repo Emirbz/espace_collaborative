@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.security.identity.SecurityIdentity;
 
@@ -121,11 +122,29 @@ public  User()
     }
 
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "users")
     private Set<Room> rooms = new HashSet<>();
 
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "users")
+    private Set<Reply> replies = new HashSet<>();
 
 
+    public Set<Reply> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(Set<Reply> replies) {
+        this.replies = replies;
+    }
+
+    public Set<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -145,6 +164,7 @@ public  User()
     }
 
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private Set<Message> messages;
 

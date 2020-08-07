@@ -112,10 +112,7 @@ public class Room extends PanacheEntityBase {
                 Objects.equals(users, room.users);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, image, subject, users);
-    }
+
 
 
 

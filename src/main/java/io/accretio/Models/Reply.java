@@ -1,23 +1,14 @@
 package io.accretio.Models;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
+import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Table
 @Entity
@@ -38,6 +29,20 @@ public class Reply extends PanacheEntityBase {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Topic topic;
+
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(name = "reply_user",
+            joinColumns = @JoinColumn(name = "reply_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> users = new HashSet<>();
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
 
     public long getId() {
         return id;

@@ -27,7 +27,7 @@ public class UserController {
 
 
     @Inject
-    private UserService userService;
+    UserService userService;
     @Inject
     SecurityIdentity identity;
 

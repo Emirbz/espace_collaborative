@@ -32,7 +32,7 @@ public class TagsController {
     @Transactional
     public Response getAllTags() {
         List<Tag> tags =tagService.getAllTags();
-        return Response.ok(tags).status(201).build();
+        return Response.ok(tags).status(200).build();
     }
 
     @GET
@@ -42,7 +42,7 @@ public class TagsController {
 
         List<Tag> tags = tagService.searchTag(name);
 
-        return Response.ok(tags).build();
+        return Response.ok(tags).status(200).build();
     }
 
 }
