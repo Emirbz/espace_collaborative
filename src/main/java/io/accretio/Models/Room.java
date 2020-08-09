@@ -89,16 +89,6 @@ public class Room extends PanacheEntityBase {
     private Set<User> users = new HashSet<>();
 
 
-    @Override
-    public String toString() {
-        return "Room{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", image='" + image + '\'' +
-                ", subject='" + subject + '\'' +
-                ", users=" + users.toString() +
-                '}';
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -112,8 +102,11 @@ public class Room extends PanacheEntityBase {
                 Objects.equals(users, room.users);
     }
 
+    public Room(long id) {
+        this.id = id;
+    }
+    public Room() {
 
-
-
+    }
 
 }

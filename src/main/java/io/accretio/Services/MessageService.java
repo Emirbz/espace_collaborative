@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.jboss.logging.Logger;
 
@@ -53,6 +54,16 @@ public class MessageService {
         messageRepository.persist(message);
 
     }
+    @Transactional
+    public Message addMessageEventBus(Message message) {
+        LOG.info("Message Persisted from evnetBus");
+
+        messageRepository.persist(message);
+        return  message;
+
+    }
+
+
 
     public List<Message> findByRoom(int id) {
 

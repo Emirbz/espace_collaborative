@@ -13,7 +13,7 @@ import io.accretio.Repository.UserRepository;
 public class UserService {
 
     @Inject
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     public List<User> getUser() {
         return userRepository.listAll();
@@ -33,6 +33,13 @@ public class UserService {
     public User findUserByUsername(String username) {
         System.out.println(username);
         return userRepository.find("username", username).firstResult();
+    }
+
+
+    @Transactional
+    public User findUserById(String id) {
+
+        return userRepository.findById(id);
     }
 
     public void updateUser(String id, User user) {

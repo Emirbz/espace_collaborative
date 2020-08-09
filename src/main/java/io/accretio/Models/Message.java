@@ -108,17 +108,7 @@ public class Message extends PanacheEntityBase {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Room room;
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "id=" + id +
-                ", body='" + body + '\'' +
-                ", type=" + type +
-                ", timestamp=" + timestamp +
-                ", room=" + room +
-                ", user=" + user +
-                '}';
-    }
+
 
     @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -147,5 +137,9 @@ public class Message extends PanacheEntityBase {
 
 
     public Message() {
+    }
+
+    public Message(long id) {
+        this.id = id;
     }
 }

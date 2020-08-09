@@ -32,7 +32,8 @@ public class RoomController {
 
 
     @Inject
-    private RoomService roomService;
+    RoomService roomService;
+
 
 
 

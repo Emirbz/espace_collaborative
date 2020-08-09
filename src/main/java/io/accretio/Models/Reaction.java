@@ -22,7 +22,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Reaction extends PanacheEntityBase {
-    public enum type {
+    public enum reactionType {
         BRAVO,
         LIKE,
         LOVE,
@@ -39,7 +39,7 @@ public class Reaction extends PanacheEntityBase {
         return "Reaction{" +
                 "id=" + id +
                 ", type=" + type +
-                ", message=" + message +
+                ", message=" + message.getId() +
                 ", user=" + user +
                 '}';
     }
@@ -53,15 +53,15 @@ public class Reaction extends PanacheEntityBase {
     }
 
 
-    public Reaction.type getType() {
+    public Reaction.reactionType getType() {
         return type;
     }
 
     @Enumerated(EnumType.STRING)
-    public type type;
+    public reactionType type;
 
 
-    public void setType(Reaction.type type) {
+    public void setType(Reaction.reactionType type) {
         this.type = type;
     }
 
@@ -91,4 +91,13 @@ public class Reaction extends PanacheEntityBase {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private User user;
 
+public Reaction()
+{
+
+}
+
+    public Reaction(Reaction.reactionType type, User user) {
+    this.type = type;
+        this.user = user;
+    }
 }

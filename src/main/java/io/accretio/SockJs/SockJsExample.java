@@ -1,5 +1,10 @@
 package io.accretio.SockJs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.accretio.Models.Reaction;
+import io.accretio.Models.Room;
+import io.accretio.Models.User;
+import io.accretio.Services.*;
 import io.accretio.Utils.FileUploader;
 import io.minio.errors.*;
 import io.quarkus.security.identity.IdentityProviderManager;
@@ -12,6 +17,8 @@ import io.vertx.ext.eventbus.bridge.tcp.TcpEventBusBridge;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import org.jboss.logging.Logger;
+import org.riversun.promise.Func;
+import org.riversun.promise.Promise;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -34,9 +41,26 @@ public class SockJsExample {
     private final Vertx vertx;
     private BridgeOptionImpl bridgeOption;
     private String roomId;
+    private final ObjectMapper objectMapper;
+
 
 
     EventBus eventBus;
+
+    @Inject
+    UserService userService;
+
+    @Inject
+    MessageService messageService;
+
+
+    @Inject
+    ReactionService reactionService;
+
+    @Inject
+    SondageService sondageService;
+    @Inject
+    ChoixService choixService;
 
     @Inject
     public SockJsExample(IdentityProviderManager identityProviderManager, NotificationService notificationService,
@@ -47,6 +71,7 @@ public class SockJsExample {
         this.vertx = vertx;
         this.eventBus = vertx.eventBus();
         this.bridgeOption = bridgeOption;
+        this.objectMapper = new ObjectMapper();
 
     }
 
@@ -57,15 +82,21 @@ public class SockJsExample {
             vertx.eventBus().consumer("chat.to.server", (Message<JsonObject> message) -> {
 
                 if (message.body() instanceof JsonObject) {
-                    String type = message.body().getString("type");
-                    LOG.info("Mobile Recived");
+                    JsonObject frontBody = message.body();
+                    String type = frontBody.getString("type");
+
                     switch (type) {
                         case "TEXT":
-                        case "SONDAGE":
+                            publishText(frontBody,roomId,type);
+                            break;
+                            case "SONDAGE":
+                                publishSondage(frontBody,roomId,type);
+                                break;
                         case "VOTE":
+                            publishVote(frontBody,roomId,type);
+                            break;
                         case "REACTION":
-                            message.body().put("body", (message.body().getString("body")));
-                            message.body().put("file", "");
+                            publishReaction(frontBody,roomId,type);
                             break;
                         case "IMAGE":
                             try {
@@ -79,12 +110,11 @@ public class SockJsExample {
                             message.body().put("body", "");
                             break;
                     }
-                    setSocketValues(message, roomId,type);
+                   // pubish(message, roomId,type);
 
                 }
 
             });
-                LOG.info("roomId = " +roomId );
             this.bridgeOption.setBridgeOptionMobile("chat.to.server" ,"chat.to.client/"+roomId);
             this.bridgeOption.setBridgeOptionWeb("chat.to.server" ,"chat.to.client/"+roomId);
 
@@ -100,13 +130,113 @@ public class SockJsExample {
 
     }
 
-    private void setSocketValues(Message<JsonObject> message, String roomId, String type) {
+    private void publishVote(JsonObject frontBody, String roomId, String type) {
+        Func function1 = (action, data) -> {
+            new Thread(() -> {
+                User user = userService.findUserById(frontBody.getString("user_id"));
+                choixService.addChoixEventBus(frontBody.getInteger("choix_id"), user);
+                action.resolve(user);
+            }).start();
+        };
+
+        Func function2 = (action, data) -> {
+            frontBody.put("user", objectMapper.writeValueAsString(data));
+            publish(frontBody, type, roomId);
+            action.resolve();
+        };
+
+        Promise.resolve()
+                .then(new Promise(function1))
+                .then(new Promise(function2))
+                .start();// start Promise operation
+
+    }
+
+    private void publishSondage(JsonObject frontBody, String roomId, String type) {
+        Func function1 = (action, data) -> {
+            io.accretio.Models.Message sondage = objectMapper.readValue(frontBody.getString("body"), io.accretio.Models.Message.class);
+            new Thread(() -> {
+                io.accretio.Models.Message submittedSondage = sondageService.addSondageEventBus(sondage);
+                action.resolve(submittedSondage);
+
+            }).start();
+        };
+
+        Func function2 = (action, data) -> {
+            frontBody.put("body",objectMapper.writeValueAsString(data));
+            publish(frontBody, type,  roomId);
+            action.resolve();
+        };
+
+        Promise.resolve()
+                .then(new Promise(function1))
+                .then(new Promise(function2))
+                .start();// start Promise operation
+
+
+
+    }
+
+    private void publishReaction(JsonObject frontBody, String roomId, String type) {
+        Func function1 = (action, data) -> {
+            new Thread(() -> {
+                User user = userService.findUserById(frontBody.getString("user_id"));
+                io.accretio.Models.Message message = new io.accretio.Models.Message(frontBody.getInteger("message_id"));
+                Reaction reaction = new Reaction(Reaction.reactionType.valueOf(frontBody.getString("body")) ,user);
+                reactionService.addReactionEventBus(reaction,message);
+                action.resolve(reaction);
+            }).start();
+        };
+
+        Func function2 = (action, data) -> {
+            frontBody.put("body",objectMapper.writeValueAsString(data));
+            publish(frontBody, type,  roomId);
+            action.resolve();
+        };
+
+        Promise.resolve()
+                .then(new Promise(function1))
+                .then(new Promise(function2))
+                .start();// start Promise operation
+
+
+    }
+
+    private void publishText(JsonObject frontBody, String roomId, String type) {
+        Func function1 = (action, data) -> {
+            new Thread(() -> {
+                User user = userService.findUserById(frontBody.getString("user_id"));
+                io.accretio.Models.Message message = new io.accretio.Models.Message();
+                message.setBody(frontBody.getString("body"));
+                message.setUser(user);
+                message.setType(io.accretio.Models.Message.type.TEXT);
+                message.setRoom(new Room(frontBody.getInteger("room_id")));
+                io.accretio.Models.Message submittedMessage = messageService.addMessageEventBus(message);
+                action.resolve(submittedMessage);
+            }).start();
+        };
+
+        Func function2 = (action, data) -> {
+            frontBody.put("body",objectMapper.writeValueAsString(data));
+            publish(frontBody, type,  roomId);
+            action.resolve();
+        };
+
+        Promise.resolve()
+                .then(new Promise(function1))
+                .then(new Promise(function2))
+                .start();// start Promise operation
+
+
+
+    }
+
+    private void publish(JsonObject message,  String type, String roomId) {
         //TODO timestamp
-        long timestamp = new Date().getTime() / 1000;
-        message.body().put("timestamp", timestamp);
-        message.body().put("type", type);
+        message.put("type", type);
         LOG.info("Publishing from mobile with room id = "+roomId);
-        vertx.eventBus().publish("chat.to.client/"+roomId, message.body());
+        vertx.eventBus().publish("chat.to.client/"+roomId, message);
+
 
 
     }
@@ -136,5 +266,9 @@ public class SockJsExample {
         });
         return sockJSHandler;
     }
+
+
+
+
 
 }
