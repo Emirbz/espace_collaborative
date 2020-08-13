@@ -68,7 +68,7 @@ public class Reply extends PanacheEntityBase {
         this.user = user;
     }
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     public Topic getTopic() {
         return topic;
     }

@@ -6,14 +6,21 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import io.accretio.Models.Topic;
 import io.accretio.Models.User;
+import io.accretio.Repository.TopicRepository;
 import io.accretio.Repository.UserRepository;
+import io.vertx.core.json.JsonObject;
 
 @ApplicationScoped
 public class UserService {
 
     @Inject
     UserRepository userRepository;
+    @Inject
+    TopicService topicService;
+    @Inject
+    ReplyService replyService;
 
     public List<User> getUser() {
         return userRepository.listAll();
@@ -38,6 +45,7 @@ public class UserService {
 
     @Transactional
     public User findUserById(String id) {
+        System.out.println(id);
 
         return userRepository.findById(id);
     }
@@ -53,5 +61,18 @@ public class UserService {
 
     public User getSigneUser(String id) {
         return userRepository.findById(id);
+    }
+
+
+    public JsonObject getUserStats(User user) {
+        int countTopics = topicService.countMyTopics(user);
+        int countReplies = replyService.countMyReplies(user);
+        int countReactions = replyService.countMyReactions(user);
+        JsonObject response = new JsonObject();
+        response.put("countTopics",countTopics);
+        response.put("countReplies",countReplies);
+        response.put("countReactions",countReactions);
+        return  response;
+
     }
 }

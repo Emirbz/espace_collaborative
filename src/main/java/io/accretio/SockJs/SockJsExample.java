@@ -84,9 +84,11 @@ public class SockJsExample {
                 if (message.body() instanceof JsonObject) {
                     JsonObject frontBody = message.body();
                     String type = frontBody.getString("type");
+                    LOG.info("Front Body mobile"+frontBody);
 
                     switch (type) {
                         case "TEXT":
+
                             publishText(frontBody,roomId,type);
                             break;
                             case "SONDAGE":
@@ -155,15 +157,17 @@ public class SockJsExample {
     private void publishSondage(JsonObject frontBody, String roomId, String type) {
         Func function1 = (action, data) -> {
             io.accretio.Models.Message sondage = objectMapper.readValue(frontBody.getString("body"), io.accretio.Models.Message.class);
+            LOG.info("next Step");
             new Thread(() -> {
                 io.accretio.Models.Message submittedSondage = sondageService.addSondageEventBus(sondage);
                 action.resolve(submittedSondage);
-
             }).start();
         };
 
         Func function2 = (action, data) -> {
+
             frontBody.put("body",objectMapper.writeValueAsString(data));
+
             publish(frontBody, type,  roomId);
             action.resolve();
         };
@@ -205,6 +209,7 @@ public class SockJsExample {
     private void publishText(JsonObject frontBody, String roomId, String type) {
         Func function1 = (action, data) -> {
             new Thread(() -> {
+                LOG.info("userid =  " + frontBody.getString("user_id"));
                 User user = userService.findUserById(frontBody.getString("user_id"));
                 io.accretio.Models.Message message = new io.accretio.Models.Message();
                 message.setBody(frontBody.getString("body"));

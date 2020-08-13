@@ -132,18 +132,12 @@ public class Topic extends PanacheEntityBase {
     public void setDescription(String description) {
         this.description = description;
     }
+    public Topic(){
 
-    @Override
-    public String toString() {
-        return "Topic{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", timestamp=" + timestamp +
-                ", status=" + status +
-                ", user=" + user +
-                ", tags=" + tags +
-                ", countReplies=" + countReplies +
-                '}';
+    }
+
+    public Topic(long id, String title) {
+        this.id = id;
+        this.title = title;
     }
 }

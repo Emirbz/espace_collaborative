@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import io.accretio.Models.Topic;
 import io.accretio.Models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 

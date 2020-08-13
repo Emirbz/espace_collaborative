@@ -1,7 +1,8 @@
 package io.accretio.Services;
 
-import io.accretio.Models.Topic;
 import io.accretio.Models.Tag;
+import io.accretio.Models.Topic;
+import io.accretio.Models.User;
 import io.accretio.Repository.TagRepository;
 import io.accretio.Repository.TopicRepository;
 
@@ -9,7 +10,7 @@ import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -23,26 +24,44 @@ public class TopicService {
     TagRepository tagRepository;
 
 
-    public List<Topic> getTopicsByTags(@Nullable List<Tag> tags)
-    {
+    public List<Topic> getTopicsByTags(@Nullable List<Tag> tags, @Nullable String name) {
         assert tags != null;
-        if (tags.size()==0) {
+        assert name != null;
 
-            return setCountRepliesList(topicRepository.getAllTopics());
-         }
-         else {
-             Set<Topic> filtredTopics = new HashSet<>();
-             tags.forEach(tag -> {
-                 Tag newTag= tagRepository.findById(tag.getId());
-                 filtredTopics.addAll(newTag.getTopics().stream().sorted(Comparator.comparing(Topic::getTimestamp)).collect(Collectors.toCollection(LinkedHashSet::new)));
-             });
-             return setCountRepliesList(new ArrayList<>(filtredTopics));
-         }
+        if (tags.size() == 0) {
+            List<Topic> topics = setCountRepliesList(topicRepository.getAllTopics());
+            if (name.length() > 0) {
+                topics.removeIf(topic -> !(topic.getTitle().toLowerCase().contains(name.toLowerCase())));
+                return topics;
+            }
+            return topics;
+        } else {
+            Set<Topic> filtredTopics = new HashSet<>();
+            Set<Tag> newTags = new HashSet<>();
+            tags.stream().map(tag -> tagRepository.findById(tag.getId())).forEach(newTag -> {
+                newTags.add(newTag);
+                filtredTopics.addAll(newTag.getTopics().stream().sorted(Comparator.comparing(Topic::getTimestamp)).collect(Collectors.toCollection(LinkedHashSet::new)));
+            });
+            filtredTopics.removeIf(topic -> !(checkTopicExists(topic, newTags)));
+
+            if (name.length() > 0) {
+                filtredTopics.removeIf(topic -> !(topic.getTitle().toLowerCase().contains(name.toLowerCase())));
+            }
+            return setCountRepliesList(new ArrayList<>(filtredTopics));
+
+        }
 
 
     }
-    public List<Topic> setCountRepliesList(List<Topic> topics)
-    {
+
+    public boolean checkTopicExists(Topic topic, Set<Tag> tags) {
+        AtomicBoolean exists = new AtomicBoolean(true);
+        tags.stream().filter(tag -> tag.getTopics().stream().noneMatch(topic1 -> topic1.getId() == topic.getId())).map(tag -> false).forEach(exists::set);
+        return exists.get();
+
+    }
+
+    public List<Topic> setCountRepliesList(List<Topic> topics) {
         for (Topic topic : topics) {
             setCountReplies(topic);
         }
@@ -50,9 +69,7 @@ public class TopicService {
     }
 
 
-
-    public Topic setCountReplies(Topic topic)
-    {
+    public Topic setCountReplies(Topic topic) {
         topic.setCountReplies(topic.getReplies().size());
         return topic;
 
@@ -84,8 +101,8 @@ public class TopicService {
     public Topic getTopicById(long id) {
         Topic topic = setCountReplies(topicRepository.findById(id));
         long seen = topic.getSeen();
-        topicRepository.update("seen = ?1 where id = ?2", (seen+1),id);
-        topic.setSeen(seen+1);
+        topicRepository.update("seen = ?1 where id = ?2", (seen + 1), id);
+        topic.setSeen(seen + 1);
         return topic;
     }
 
@@ -94,5 +111,13 @@ public class TopicService {
         topicRepository.update("status = ?1 where id = ?2", Topic.Status.Inactive.name(), topic.getId());
     }
 
+    public List<Topic> getMyTopics(User user) {
+        return  topicRepository.getMyTopics(user);
+    }
 
+
+    public int countMyTopics(User user) {
+        return getMyTopics(user).size();
+
+    }
 }

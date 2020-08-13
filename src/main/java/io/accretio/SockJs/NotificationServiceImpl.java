@@ -72,6 +72,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         JsonObject jsonObject = event.getRawMessage();
         JsonObject frontBody = new JsonObject(jsonObject.getString("body"));
+        LOG.info("Front Body Web" + frontBody);
         String roomId = frontBody.getInteger("room_id").toString();
         String type = frontBody.getString("type");
         switch (type) {

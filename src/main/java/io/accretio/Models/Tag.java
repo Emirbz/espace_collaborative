@@ -61,13 +61,5 @@ public class Tag extends PanacheEntityBase {
         this.countTopics = countTopics;
     }
 
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", countTopics=" + countTopics +
-                ", topics=" + topics +
-                '}';
-    }
+
 }

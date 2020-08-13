@@ -1,7 +1,9 @@
 package io.accretio.Controllers;
 
 import io.accretio.Errors.ForbiddenException;
+import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.Reply;
+import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Services.ReplyService;
 import io.accretio.Services.UserService;
@@ -71,5 +73,19 @@ public class ReplyController {
 
 
     }
+
+    @DELETE
+    @Path("{id}")
+    @Transactional
+    public Response deleteRoom(@org.jboss.resteasy.annotations.jaxrs.PathParam Integer id) {
+        Reply reply = replyService.getReplyById(id);
+
+        if (reply == null) {
+            return NotFoundException.NotFoundResponse("Topic with id "+id+" not found");
+        }
+        replyService.deleteRoom(reply);
+        return Response.status(204).build();
+    }
+
 
 }

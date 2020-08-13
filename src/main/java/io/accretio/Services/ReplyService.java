@@ -1,6 +1,7 @@
 package io.accretio.Services;
 
 import io.accretio.Models.Reply;
+import io.accretio.Models.Topic;
 import io.accretio.Models.User;
 import io.accretio.Repository.ReplyRepository;
 
@@ -43,7 +44,9 @@ public class ReplyService {
 
 
     public List<Reply> getRepliesByTopic(Integer id) {
-        return replyRepository.getRepliesByTopic(id);
+        List<Reply> replies = replyRepository.getRepliesByTopic(id);
+        replies.forEach(reply -> reply.setTopic(null));
+        return  replies;
     }
 
     public Reply likeReply(Integer id, String userName) {
@@ -56,6 +59,26 @@ public class ReplyService {
             reply.getUsers().add(user);
         }
         Reply.persist(reply);
+        reply.setTopic(null);
         return reply;
+    }
+
+    public List<Reply> getMyReplies(User user) {
+        List<Reply> replies = replyRepository.getMyReplies(user);
+        replies.forEach(reply -> reply.setTopic(new Topic(reply.getTopic().getId(), reply.getTopic().getTitle())));
+        return replyRepository.getMyReplies(user);
+    }
+
+    public int countMyReplies(User user) {
+        return  getMyReplies(user).size();
+    }
+
+    public int countMyReactions(User user) {
+       return (int) getReplies().stream().filter(reply -> reply.getUsers().contains(user)).count();
+    }
+
+    public void deleteRoom(Reply reply) {
+        replyRepository.delete(reply);
+
     }
 }

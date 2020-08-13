@@ -3,6 +3,7 @@ package io.accretio.Repository;
 
 import io.accretio.Models.Message;
 import io.accretio.Models.Reply;
+import io.accretio.Models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.panache.common.Sort;
 
@@ -15,5 +16,9 @@ public class ReplyRepository implements PanacheRepository<Reply> {
     public List<Reply> getRepliesByTopic(Integer id) {
         return find("topic_id=?1" , Sort.by("timestamp", Sort.Direction.Descending),id).list();
 
+    }
+
+    public List<Reply> getMyReplies(User user) {
+        return find("user_id=?1", Sort.by("timestamp", Sort.Direction.Descending),user.getId()).list();
     }
 }

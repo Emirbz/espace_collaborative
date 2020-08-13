@@ -1,5 +1,7 @@
 package io.accretio.Controllers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -37,8 +39,8 @@ public class TopicController {
     @POST
     @Path("/tag")
     @Produces("application/json")
-    public Response getTopicsByTags(@Nullable List<Tag> tags)  {
-        List<Topic> topics = topicService.getTopicsByTags(tags);
+    public Response getTopicsByTags(@Nullable List<Tag> tags ,@Nullable @DefaultValue("")@QueryParam("name") String name)  {
+        List<Topic> topics = topicService.getTopicsByTags(tags,name);
         return Response.ok(topics).status(200).build();
     }
 

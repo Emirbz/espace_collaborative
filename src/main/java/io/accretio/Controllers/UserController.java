@@ -2,9 +2,16 @@ package io.accretio.Controllers;
 
 import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
+import io.accretio.Models.Reply;
+import io.accretio.Models.Room;
+import io.accretio.Models.Topic;
 import io.accretio.Models.User;
+import io.accretio.Services.ReplyService;
+import io.accretio.Services.RoomService;
+import io.accretio.Services.TopicService;
 import io.accretio.Services.UserService;
 import io.quarkus.security.identity.SecurityIdentity;
+import io.vertx.core.json.JsonObject;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
@@ -28,8 +35,87 @@ public class UserController {
 
     @Inject
     UserService userService;
+
+    @Inject
+    TopicService topicService;
+
+    @Inject
+    ReplyService replyService;
+    @Inject
+    RoomService roomService;
+
     @Inject
     SecurityIdentity identity;
+
+    @GET
+    @Path("/topic")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myTopics() {
+        Principal caller =  identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none"))
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+        List<Topic> topics = topicService.getMyTopics(user);
+
+
+        return Response.ok(topics).status(200).build();
+    }
+
+    @GET
+    @Path("/reply")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myReplies() {
+        Principal caller =  identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none"))
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+        List<Reply> replies = replyService.getMyReplies(user);
+
+
+        return Response.ok(replies).status(200).build();
+    }
+
+    @GET
+    @Path("/room")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myRooms() {
+        Principal caller =  identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none"))
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+        List<Room> rooms = roomService.getMyRooms(user);
+
+        return Response.ok(rooms).status(200).build();
+    }
+
+    @GET
+    @Path("/stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myStats() {
+        Principal caller =  identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none"))
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+        JsonObject response = userService.getUserStats(user);
+
+        return Response.ok(response).status(200).build();
+    }
 
     @GET
     @Path("/me")

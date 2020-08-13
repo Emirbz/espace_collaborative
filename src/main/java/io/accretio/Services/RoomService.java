@@ -3,11 +3,14 @@ package io.accretio.Services;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import io.accretio.Models.User;
 import org.jboss.logging.Logger;
 
 import io.accretio.Config.LoggingFilter;
@@ -72,4 +75,8 @@ public class RoomService {
         return roomRepository.findById(id);
     }
 
+    public List<Room> getMyRooms(User user) {
+       List<Room> rooms = getRoom();
+       return  rooms.stream().filter(room -> room.getUsers().contains(user)).collect(Collectors.toList());
+    }
 }
