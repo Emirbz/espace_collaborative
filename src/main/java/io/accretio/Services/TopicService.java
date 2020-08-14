@@ -115,13 +115,19 @@ public class TopicService {
         topicRepository.update("status = ?1 where id = ?2", Topic.Status.Inactive.name(), topic.getId());
     }
 
-    public List<Topic> getMyTopics(User user) {
-        return  topicRepository.getMyTopics(user);
+    public List<Topic> getMyTopics(User user,@Nullable String name) {
+        assert name != null;
+        if (name.length() == 0)
+        {
+            return  topicRepository.getMyTopics(user);
+        }
+        return topicRepository.searchMyTopics(user,name);
+
     }
 
 
     public int countMyTopics(User user) {
-        return getMyTopics(user).size();
+        return getMyTopics(user, "").size();
 
     }
 

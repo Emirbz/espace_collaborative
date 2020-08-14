@@ -15,6 +15,7 @@ import io.vertx.core.json.JsonObject;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
+import javax.annotation.Nullable;
 import javax.annotation.security.PermitAll;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class UserController {
     @Path("/topic")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myTopics() {
+    public Response myTopics(@Nullable @DefaultValue("")@QueryParam("name") String name) {
         Principal caller =  identity.getPrincipal();
         String userName = caller == null ? "none" : caller.getName();
         if (userName.equals("none"))
@@ -59,7 +60,7 @@ public class UserController {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
         User user = userService.findUserByUsername(userName);
-        List<Topic> topics = topicService.getMyTopics(user);
+        List<Topic> topics = topicService.getMyTopics(user,name);
 
 
         return Response.ok(topics).status(200).build();
@@ -69,7 +70,7 @@ public class UserController {
     @Path("/reply")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myReplies() {
+    public Response myReplies(@Nullable @DefaultValue("")@QueryParam("name") String name) {
         Principal caller =  identity.getPrincipal();
         String userName = caller == null ? "none" : caller.getName();
         if (userName.equals("none"))
@@ -77,7 +78,7 @@ public class UserController {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
         User user = userService.findUserByUsername(userName);
-        List<Reply> replies = replyService.getMyReplies(user);
+        List<Reply> replies = replyService.getMyReplies(user,name);
 
 
         return Response.ok(replies).status(200).build();

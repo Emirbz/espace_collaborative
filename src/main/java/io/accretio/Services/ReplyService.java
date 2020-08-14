@@ -7,6 +7,7 @@ import io.accretio.Repository.ReplyRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -46,7 +47,7 @@ public class ReplyService {
     public List<Reply> getRepliesByTopic(Integer id) {
         List<Reply> replies = replyRepository.getRepliesByTopic(id);
         replies.forEach(reply -> reply.setTopic(null));
-        return  replies;
+        return replies;
     }
 
     public Reply likeReply(Integer id, String userName) {
@@ -63,18 +64,26 @@ public class ReplyService {
         return reply;
     }
 
-    public List<Reply> getMyReplies(User user) {
-        List<Reply> replies = replyRepository.getMyReplies(user);
+    public List<Reply> getMyReplies(User user, String name) {
+        assert name != null;
+        List<Reply> replies;
+        if (name.length()==0) {
+            replies =replyRepository.getMyReplies(user);
+        }
+        else
+        {
+            replies = replyRepository.searchMyReplies(user,name);
+        }
         replies.forEach(reply -> reply.setTopic(new Topic(reply.getTopic().getId(), reply.getTopic().getTitle())));
-        return replyRepository.getMyReplies(user);
+        return replies;
     }
 
     public int countMyReplies(User user) {
-        return  getMyReplies(user).size();
+        return getMyReplies(user, "").size();
     }
 
     public int countMyReactions(User user) {
-       return (int) getReplies().stream().filter(reply -> reply.getUsers().contains(user)).count();
+        return (int) getReplies().stream().filter(reply -> reply.getUsers().contains(user)).count();
     }
 
 

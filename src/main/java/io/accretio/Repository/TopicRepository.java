@@ -24,4 +24,7 @@ public class TopicRepository implements PanacheRepository<Topic> {
     public List<Topic> getMyTopics(User user) {
         return find("user_id=?1",Sort.by("timestamp", Sort.Direction.Descending),user.getId()).list();
     }
+    public List<Topic> searchMyTopics(User user,String name) {
+        return find("user_id=?1 AND title Like concat('%', ?2, '%')",Sort.by("timestamp", Sort.Direction.Descending),user.getId(),name).list();
+    }
 }
