@@ -53,6 +53,10 @@ public class TopicService {
 
 
     }
+    public List<Topic> getAllTopics()
+    {
+        return topicRepository.listAll();
+    }
 
     public boolean checkTopicExists(Topic topic, Set<Tag> tags) {
         AtomicBoolean exists = new AtomicBoolean(true);
@@ -119,5 +123,10 @@ public class TopicService {
     public int countMyTopics(User user) {
         return getMyTopics(user).size();
 
+    }
+
+    public List<Topic> getPoupularTopics() {
+
+        return setCountRepliesList(getAllTopics()).stream().sorted(Comparator.comparing(Topic::getCountReplies).reversed()).collect(Collectors.toList());
     }
 }

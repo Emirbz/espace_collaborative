@@ -1,32 +1,20 @@
 package io.accretio.Services;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import io.accretio.Config.LoggingFilter;
+import io.accretio.Models.Room;
+import io.accretio.Models.User;
+import io.accretio.Repository.RoomRepository;
+import io.accretio.Utils.FileUploader;
+import io.minio.errors.*;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import io.accretio.Models.User;
-import org.jboss.logging.Logger;
-
-import io.accretio.Config.LoggingFilter;
-import io.accretio.Models.Room;
-import io.accretio.Repository.RoomRepository;
-import io.accretio.Utils.FileUploader;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidBucketNameException;
-import io.minio.errors.InvalidEndpointException;
-import io.minio.errors.InvalidExpiresRangeException;
-import io.minio.errors.InvalidPortException;
-import io.minio.errors.InvalidResponseException;
-import io.minio.errors.RegionConflictException;
-import io.minio.errors.XmlParserException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class RoomService {
@@ -71,12 +59,25 @@ public class RoomService {
 
     }
 
+    public Room addUsers(Room room, User user)
+    {
+        room.getUsers().add(user);
+        roomRepository.persist(room);
+        return  room;
+    }
+
     public Room getSigneRoom(long id) {
         return roomRepository.findById(id);
     }
 
     public List<Room> getMyRooms(User user) {
-       List<Room> rooms = getRoom();
-       return  rooms.stream().filter(room -> room.getUsers().contains(user)).collect(Collectors.toList());
+        List<Room> rooms = getRoom();
+        return rooms.stream().filter(room -> room.getUsers().contains(user)).collect(Collectors.toList());
+    }
+
+    public Room removeUser(Room room, User user) {
+        room.getUsers().remove(user);
+        roomRepository.persist(room);
+        return  room;
     }
 }

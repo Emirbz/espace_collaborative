@@ -77,8 +77,5 @@ public class ReplyService {
        return (int) getReplies().stream().filter(reply -> reply.getUsers().contains(user)).count();
     }
 
-    public void deleteRoom(Reply reply) {
-        replyRepository.delete(reply);
 
-    }
 }

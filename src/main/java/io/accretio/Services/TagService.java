@@ -8,10 +8,8 @@ import io.accretio.Repository.TopicRepository;
 import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @ApplicationScoped
@@ -25,6 +23,9 @@ public class TagService {
         List<Tag> tags = tagRepository.listAll();
        tags.forEach(tag -> tag.setCountTopics(tag.getTopics().size()));
        return tags;
+    }
+    public List<Tag> getPopularTags() {
+        return getAllTags().stream().sorted(Comparator.comparing(Tag::getCountTopics).reversed()).collect(Collectors.toList());
     }
 
     public List<Tag> searchTag(String name) {

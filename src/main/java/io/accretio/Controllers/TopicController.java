@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import io.accretio.Errors.NotFoundException;
+import io.accretio.Models.Reply;
 import io.accretio.Models.Tag;
 import io.accretio.Models.Topic;
 import io.accretio.Services.TopicService;
@@ -53,12 +55,34 @@ public class TopicController {
         return Response.ok(topic).status(200).build();
     }
 
+    @GET
+    @Transactional
+    @Path("/popular")
+    @Produces("application/json")
+    public Response getPopularTopics()  {
+        List<Topic> topics = topicService.getPoupularTopics();
+        return Response.ok(topics).status(200).build();
+    }
+
     @PUT
     @Path("{id}")
     public Response setTopicInactive(@PathParam("id") long id) {
         Topic topic = topicService.getTopicById(id);
         topicService.setInactive(topic);
         return Response.ok(topic).build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    @Transactional
+    public Response deleteTopic(@org.jboss.resteasy.annotations.jaxrs.PathParam Integer id) {
+        Topic topic = topicService.getTopicById(id);
+
+        if (topic == null) {
+            return NotFoundException.NotFoundResponse("Topic with id "+id+" not found");
+        }
+        topicService.deleteTopic(topic);
+        return Response.status(204).build();
     }
 
 }

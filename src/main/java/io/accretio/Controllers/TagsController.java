@@ -36,6 +36,15 @@ public class TagsController {
     }
 
     @GET
+    @Produces("application/json")
+    @Path("/popular")
+    @Transactional
+    public Response getPopularTags() {
+        List<Tag> tags =tagService.getPopularTags();
+        return Response.ok(tags).status(200).build();
+    }
+
+    @GET
     @Path("/{name}")
     @Produces("application/json")
     public Response getTagsByName(@PathParam("name") String name) {

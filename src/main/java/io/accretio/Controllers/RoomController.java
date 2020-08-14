@@ -1,27 +1,22 @@
 package io.accretio.Controllers;
 
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
 import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Services.RoomService;
+import io.accretio.Services.UserService;
+import io.quarkus.security.identity.SecurityIdentity;
+import org.jboss.resteasy.annotations.jaxrs.PathParam;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.security.Principal;
+import java.util.List;
 
 @ApplicationScoped
 @Path("/room")
@@ -30,17 +25,20 @@ import io.accretio.Services.RoomService;
 public class RoomController {
 
 
-
     @Inject
     RoomService roomService;
 
+    @Inject
+    SecurityIdentity identity;
 
+    @Inject
+    UserService userService;
 
 
     @POST
     @Produces("application/json")
     @Transactional
-    public Response addRoom(Room room){
+    public Response addRoom(Room room) {
 
         roomService.addRoom(room);
         return Response.ok(room).status(201).build();
@@ -48,7 +46,7 @@ public class RoomController {
 
     @GET
     @Produces("application/json")
-    public Response getRooms(){
+    public Response getRooms() {
         List<Room> room = roomService.getRoom();
         return Response.ok(room).build();
     }
@@ -61,49 +59,85 @@ public class RoomController {
         Room entity = roomService.getSigneRoom(id);
 
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("Room with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
-        roomService.updateRoom(id,room);
+        roomService.updateRoom(id, room);
 
         return Response.ok(room).build();
 
 
     }
+
     @PUT
     @Path("/user/{id}")
     @Transactional
     public Response updateRoomUsers(@PathParam Integer id, User user) {
         Room entity = roomService.getSigneRoom(id);
+        if (entity == null) {
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
+        }
 
-        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(user.getId())))
-
-        {
-
-                return ForbiddenException.ForbiddenResponse("User Already exists");
-
+        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(user.getId()))) {
+            return Response.ok(entity).status(204).build();
 
         }
-        entity.getUsers().add(user);
-        Room.persist(entity);
-
-
-      /*  if (entity == null) {
-            return NotFoundException.NotFoundResponse("Room with id "+id+" not found");
-        }
-        roomService.updateRoom(id,entity);*/
-
-        return Response.ok(entity).build();
+        Room room = roomService.addUsers(entity, user);
+        return Response.ok(room).status(200).build();
 
 
     }
 
+    @PUT
+    @Path("/join/{id}")
+    @Transactional
+    public Response joinRoom(@PathParam Integer id) {
+        Room entity = roomService.getSigneRoom(id);
+        if (entity == null) {
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
+        }
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(user.getId()))) {
+            return Response.ok(entity).status(204).build();
+        }
+        Room room = roomService.addUsers(entity, user);
+        return Response.ok(room).status(200).build();
+
+    }
+
+    @PUT
+    @Path("/leav/{id}")
+    @Transactional
+    public Response leavRoom(@PathParam Integer id) {
+        Room entity = roomService.getSigneRoom(id);
+        if (entity == null) {
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
+        }
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        User user = userService.findUserByUsername(userName);
+
+        if (entity.getUsers().stream().noneMatch(user1 -> user1.getId().equals(user.getId()))) {
+            return ForbiddenException.ForbiddenResponse("User is not part of this room");
+        }
+        Room room = roomService.removeUser(entity, user);
+        return Response.ok(room).status(200).build();
+
+    }
 
     @GET
     @Path("{id}")
     public Response getSingle(@PathParam Integer id) {
         Room entity = roomService.getSigneRoom(id);
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("Room with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
         return Response.ok(entity).build();
     }
@@ -115,11 +149,15 @@ public class RoomController {
         Room entity = roomService.getSigneRoom(id);
 
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("Room with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
         roomService.deleteRoom(entity);
         return Response.status(204).build();
     }
+
+
+
+
 
 }
 

@@ -77,13 +77,13 @@ public class ReplyController {
     @DELETE
     @Path("{id}")
     @Transactional
-    public Response deleteRoom(@org.jboss.resteasy.annotations.jaxrs.PathParam Integer id) {
+    public Response deleteReply(@org.jboss.resteasy.annotations.jaxrs.PathParam Integer id) {
         Reply reply = replyService.getReplyById(id);
 
         if (reply == null) {
             return NotFoundException.NotFoundResponse("Topic with id "+id+" not found");
         }
-        replyService.deleteRoom(reply);
+        replyService.deleteReply(reply);
         return Response.status(204).build();
     }
 
