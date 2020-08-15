@@ -88,7 +88,7 @@ public class UserController {
     @Path("/room")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myRooms() {
+    public Response myRooms(@Nullable @DefaultValue("")@QueryParam("name") String name) {
         Principal caller =  identity.getPrincipal();
         String userName = caller == null ? "none" : caller.getName();
         if (userName.equals("none"))
@@ -96,7 +96,7 @@ public class UserController {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
         User user = userService.findUserByUsername(userName);
-        List<Room> rooms = roomService.getMyRooms(user);
+        List<Room> rooms = roomService.getMyRooms(user,name);
 
         return Response.ok(rooms).status(200).build();
     }

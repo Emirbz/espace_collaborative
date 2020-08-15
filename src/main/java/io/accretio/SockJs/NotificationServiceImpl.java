@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -197,6 +198,7 @@ public class NotificationServiceImpl implements NotificationService {
                 message.setUser(user);
                 message.setType(Message.type.TEXT);
                 message.setRoom(new Room(frontBody.getInteger("room_id")));
+                message.setReactions(new HashSet<>());
                 Message submittedMessage = messageService.addMessageEventBus(message);
                 action.resolve(submittedMessage);
             }).start();

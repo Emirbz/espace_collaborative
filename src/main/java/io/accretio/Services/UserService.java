@@ -68,10 +68,12 @@ public class UserService {
         int countTopics = topicService.countMyTopics(user);
         int countReplies = replyService.countMyReplies(user);
         int countReactions = replyService.countMyReactions(user);
+        int countUsefulReplies = replyService.countUsefulReplies(user);
         JsonObject response = new JsonObject();
         response.put("countTopics",countTopics);
         response.put("countReplies",countReplies);
         response.put("countReactions",countReactions);
+        response.put("countUsefulReplies",countUsefulReplies);
         return  response;
 
     }

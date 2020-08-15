@@ -59,25 +59,32 @@ public class RoomService {
 
     }
 
-    public Room addUsers(Room room, User user)
-    {
+    public Room addUsers(Room room, User user) {
         room.getUsers().add(user);
         roomRepository.persist(room);
-        return  room;
+        return room;
     }
 
     public Room getSigneRoom(long id) {
         return roomRepository.findById(id);
     }
 
-    public List<Room> getMyRooms(User user) {
-        List<Room> rooms = getRoom();
+    public List<Room> getMyRooms(User user, String name) {
+        List<Room> rooms;
+        assert name != null;
+        if (name.length() == 0) {
+            rooms = getRoom();
+
+        } else {
+            rooms = roomRepository.searchRoomByName(name);
+        }
         return rooms.stream().filter(room -> room.getUsers().contains(user)).collect(Collectors.toList());
+
     }
 
     public Room removeUser(Room room, User user) {
         room.getUsers().remove(user);
         roomRepository.persist(room);
-        return  room;
+        return room;
     }
 }

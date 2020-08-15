@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -216,6 +217,7 @@ public class SockJsExample {
                 message.setUser(user);
                 message.setType(io.accretio.Models.Message.type.TEXT);
                 message.setRoom(new Room(frontBody.getInteger("room_id")));
+                message.setReactions(new HashSet<>());
                 io.accretio.Models.Message submittedMessage = messageService.addMessageEventBus(message);
                 action.resolve(submittedMessage);
             }).start();

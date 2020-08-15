@@ -5,9 +5,9 @@ import io.accretio.Models.Topic;
 import io.accretio.Models.User;
 import io.accretio.Repository.ReplyRepository;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -60,11 +60,10 @@ public class ReplyService {
             reply.getUsers().add(user);
         }
         Reply.persist(reply);
-        reply.setTopic(null);
         return reply;
     }
 
-    public List<Reply> getMyReplies(User user, String name) {
+    public List<Reply> getMyReplies(User user,@Nullable String name) {
         assert name != null;
         List<Reply> replies;
         if (name.length()==0) {
@@ -87,4 +86,7 @@ public class ReplyService {
     }
 
 
+    public int countUsefulReplies(User user) {
+        return getMyReplies(user, "").stream().filter(reply -> reply.getUser().getId().equals(user.getId())).mapToInt(reply -> reply.getUsers().size()).sum();
+    }
 }
