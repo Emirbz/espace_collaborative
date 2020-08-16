@@ -40,7 +40,6 @@ public class ChoixService {
         Choix choix = getSingleChoix(choixId);
         Message sondage = sondageService.getSigneSondage(choix.getMessage().getId());
         Set<Choix> choixSet = sondage.getChoix();
-        System.out.println("one" + Arrays.toString(choixSet.toArray()));
         AtomicReference<User> userVoted = new AtomicReference<>();
 
         choixSet.forEach(c -> {
@@ -52,11 +51,10 @@ public class ChoixService {
             if (userVoted.get() != null) {
                 c.getUsers().remove(userVoted.get());
             }
-
         });
 
         choix.getUsers().add(user);
-        LOG.info("Persiste choix from eventBus");
+        LOG.info("Persisted Vote from eventBus");
 
     }
 

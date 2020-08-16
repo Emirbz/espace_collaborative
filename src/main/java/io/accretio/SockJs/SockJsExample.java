@@ -157,8 +157,10 @@ public class SockJsExample {
 
     private void publishSondage(JsonObject frontBody, String roomId, String type) {
         Func function1 = (action, data) -> {
+            LOG.info("Mapping  Sondage");
+            LOG.info("FrontBody Mehdi"+frontBody.getString("body"));
             io.accretio.Models.Message sondage = objectMapper.readValue(frontBody.getString("body"), io.accretio.Models.Message.class);
-            LOG.info("next Step");
+            LOG.info("next Step"+sondage.getBody());
             new Thread(() -> {
                 io.accretio.Models.Message submittedSondage = sondageService.addSondageEventBus(sondage);
                 action.resolve(submittedSondage);

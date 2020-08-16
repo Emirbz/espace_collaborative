@@ -36,7 +36,7 @@ public class SondageService {
 
     @Transactional
     public Message addSondageEventBus(Message sondage) {
-        LOG.info("Sondage Persisted from evnetBus");
+
 
 
         Set<Choix> choix = sondage.getChoix();
@@ -46,6 +46,8 @@ public class SondageService {
         });
 
         sondageRepository.persist(sondage);
+        LOG.info("Sondage Persisted from evnetBus");
+
         return  sondage;
 
     }

@@ -119,9 +119,9 @@ public class TopicService {
         assert name != null;
         if (name.length() == 0)
         {
-            return  topicRepository.getMyTopics(user);
+            return  setCountRepliesList(topicRepository.getMyTopics(user));
         }
-        return topicRepository.searchMyTopics(user,name);
+        return setCountRepliesList(topicRepository.searchMyTopics(user,name));
 
     }
 
