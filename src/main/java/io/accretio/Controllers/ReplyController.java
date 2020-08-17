@@ -3,7 +3,6 @@ package io.accretio.Controllers;
 import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
 import io.accretio.Models.Reply;
-import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Services.ReplyService;
 import io.accretio.Services.UserService;
@@ -85,6 +84,28 @@ public class ReplyController {
         }
         replyService.deleteReply(reply);
         return Response.status(204).build();
+    }
+    @PUT
+    @Transactional
+    @Path("{id}")
+    public Response setReplyUseful(@PathParam("id") long id) {
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        Reply reply = replyService.getReplyById(id);
+        if (reply == null) {
+            return NotFoundException.NotFoundResponse("Reply with id "+id+" not found");
+        }
+        User user = userService.findUserByUsername(userName);
+        if (!reply.getTopic().getUser().getId().equals(user.getId())) {
+            return ForbiddenException.ForbiddenResponse("You don't own this topic");
+        }
+
+        replyService.setUseful(reply);
+        reply.setUseful(!reply.isUseful());
+        return Response.ok(reply).build();
     }
 
 

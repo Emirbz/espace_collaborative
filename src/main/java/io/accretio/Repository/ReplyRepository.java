@@ -1,9 +1,7 @@
 package io.accretio.Repository;
 
 
-import io.accretio.Models.Message;
 import io.accretio.Models.Reply;
-import io.accretio.Models.Topic;
 import io.accretio.Models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.panache.common.Sort;
@@ -24,5 +22,9 @@ public class ReplyRepository implements PanacheRepository<Reply> {
     }
     public List<Reply> searchMyReplies(User user, String name) {
         return find("user_id=?1 AND reply Like concat('%', ?2, '%')",Sort.by("timestamp", Sort.Direction.Descending),user.getId(),name).list();
+    }
+
+    public void setInactive(Reply reply) {
+        update("useful =?1 where id = ?2",!(reply.isUseful()),  reply.getId());
     }
 }

@@ -22,6 +22,16 @@ public class Reply extends PanacheEntityBase {
     @Lob
     private String reply;
 
+    private boolean useful = false;
+
+    public boolean isUseful() {
+        return useful;
+    }
+
+    public void setUseful(boolean useful) {
+        this.useful = useful;
+    }
+
     private long timestamp = new Date().getTime() / 1000;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)

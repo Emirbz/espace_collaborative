@@ -24,4 +24,12 @@ public class UserRepository implements PanacheRepositoryBase<User,String> {
     }
 
 
+    public void updateBadge(User user, int badgeId) {
+        update("badge_id = ?1  where id = ?2",badgeId,user.getId());
+    }
+
+    public void upddateProgress(User user, double badgeProgress) {
+        update("progress = ?1  where id = ?2",badgeProgress,user.getId());
+
+    }
 }

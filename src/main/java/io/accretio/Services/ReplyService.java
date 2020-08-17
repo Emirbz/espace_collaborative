@@ -60,6 +60,7 @@ public class ReplyService {
             reply.getUsers().add(user);
         }
         Reply.persist(reply);
+        userService.setBadge(reply.getUser());
         return reply;
     }
 
@@ -81,12 +82,22 @@ public class ReplyService {
         return getMyReplies(user, "").size();
     }
 
-    public int countMyReactions(User user) {
+    public int countMyLikes(User user) {
         return (int) getReplies().stream().filter(reply -> reply.getUsers().contains(user)).count();
     }
 
 
-    public int countUsefulReplies(User user) {
+    public int countSumUsersLike(User user) {
         return getMyReplies(user, "").stream().filter(reply -> reply.getUser().getId().equals(user.getId())).mapToInt(reply -> reply.getUsers().size()).sum();
+    }
+    public int countUsefulReplies(User user) {
+        return  (int) getMyReplies(user, "").stream().filter(Reply::isUseful).count();
+    }
+
+
+    public void setUseful(Reply reply) {
+        replyRepository.setInactive(reply);
+        userService.setBadge(reply.getUser());
+
     }
 }
