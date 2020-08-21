@@ -2,14 +2,8 @@ package io.accretio.Controllers;
 
 import io.accretio.Errors.ForbiddenException;
 import io.accretio.Errors.NotFoundException;
-import io.accretio.Models.Reply;
-import io.accretio.Models.Room;
-import io.accretio.Models.Topic;
-import io.accretio.Models.User;
-import io.accretio.Services.ReplyService;
-import io.accretio.Services.RoomService;
-import io.accretio.Services.TopicService;
-import io.accretio.Services.UserService;
+import io.accretio.Models.*;
+import io.accretio.Services.*;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.vertx.core.json.JsonObject;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -33,12 +27,13 @@ import java.util.List;
 public class UserController {
 
 
-
     @Inject
     UserService userService;
 
     @Inject
     TopicService topicService;
+    @Inject
+    BadgeService badgeService;
 
     @Inject
     ReplyService replyService;
@@ -48,55 +43,74 @@ public class UserController {
     @Inject
     SecurityIdentity identity;
 
+    private User loggedUser;
+
     @GET
     @Path("/topic")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myTopics(@Nullable @DefaultValue("")@QueryParam("name") String name) {
-        Principal caller =  identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none"))
+    public Response myTopics(@Nullable @DefaultValue("") @QueryParam("name") String name) {
+        if (getUserIdentity())
         {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
-        List<Topic> topics = topicService.getMyTopics(user,name);
+        List<Topic> topics = topicService.getMyTopics(loggedUser, name);
 
 
         return Response.ok(topics).status(200).build();
+    }
+
+    public boolean getUserIdentity() {
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return true;
+
+        }
+        loggedUser = userService.findUserByUsername(userName);
+        return false;
     }
 
     @GET
     @Path("/reply")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myReplies(@Nullable @DefaultValue("")@QueryParam("name") String name) {
-        Principal caller =  identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none"))
+    public Response myReplies(@Nullable @DefaultValue("") @QueryParam("name") String name) {
+        if (getUserIdentity())
         {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
-        List<Reply> replies = replyService.getMyReplies(user,name);
+        List<Reply> replies = replyService.getMyReplies(loggedUser, name);
 
 
         return Response.ok(replies).status(200).build();
     }
 
+
     @GET
     @Path("/room")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
-    public Response myRooms(@Nullable @DefaultValue("")@QueryParam("name") String name) {
-        Principal caller =  identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none"))
+    public Response myRooms(@Nullable @DefaultValue("") @QueryParam("name") String name) {
+        if (getUserIdentity())
         {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
-        List<Room> rooms = roomService.getMyRooms(user,name);
+        List<Room> rooms = roomService.getMyRooms(loggedUser, name);
+
+        return Response.ok(rooms).status(200).build();
+    }
+
+    @GET
+    @Path("/room/created")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myCreatedRooms(@Nullable @DefaultValue("") @QueryParam("name") String name) {
+        if (getUserIdentity())
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        List<Room> rooms = roomService.getMyCreatedRooms(loggedUser, name);
 
         return Response.ok(rooms).status(200).build();
     }
@@ -106,16 +120,28 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
     public Response myStats() {
-        Principal caller =  identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none"))
+        if (getUserIdentity())
         {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
-        JsonObject response = userService.getUserStats(user);
+
+        JsonObject response = userService.getUserStats(loggedUser);
 
         return Response.ok(response).status(200).build();
+    }
+
+    @GET
+    @Path("/badge")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response myBadges() {
+        if (getUserIdentity())
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        List<Badge> badges = badgeService.getMyBadges(loggedUser);
+
+        return Response.ok(badges).status(200).build();
     }
 
     @GET
@@ -123,30 +149,27 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
     public Response me() {
-        Principal caller =  identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none"))
+        if (getUserIdentity())
         {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-
-
-        return Response.ok(userService.findUserByUsername(userName)).status(200).build();
+        return Response.ok(loggedUser).status(200).build();
     }
 
 
     @POST
     @Produces("application/json")
 
-    public Response addUser(User user){
+    public Response addUser(User user) {
         userService.addUser(user);
         return Response.ok(user).status(201).build();
     }
+
     @GET
     @Produces("application/json")
     @NoCache
     @PermitAll
-    public Response getUsers(){
+    public Response getUsers() {
         List<User> user = userService.getUser();
         return Response.ok(user).build();
     }
@@ -159,9 +182,9 @@ public class UserController {
 
 
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("User with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("User with id " + id + " not found");
         }
-        userService.updateUser(id,user);
+        userService.updateUser(id, user);
 
         return Response.ok(user).build();
 
@@ -174,16 +197,17 @@ public class UserController {
     public Response getSingle(@PathParam String id) {
         User entity = userService.getSigneUser(id);
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("User with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("User with id " + id + " not found");
         }
         return Response.ok(entity).build();
     }
+
     @GET
     @Path("/name/{searchToken}")
     public Response getUserByName(@PathParam String searchToken) {
-        List <User> userList = userService.findUserByName(searchToken);
+        List<User> userList = userService.findUserByName(searchToken);
         if (userList.isEmpty()) {
-            return NotFoundException.NotFoundResponse("User with name "+searchToken+" not found");
+            return NotFoundException.NotFoundResponse("User with name " + searchToken + " not found");
         }
         return Response.ok(userList).build();
     }
@@ -191,11 +215,11 @@ public class UserController {
     @DELETE
     @Path("{id}")
     @Transactional
-    public Response deleteUser(@PathParam String  id) {
+    public Response deleteUser(@PathParam String id) {
         User entity = userService.getSigneUser(id);
 
         if (entity == null) {
-            return NotFoundException.NotFoundResponse("User with id "+id+" not found");
+            return NotFoundException.NotFoundResponse("User with id " + id + " not found");
         }
         userService.deleteUser(entity);
         return Response.status(204).build();

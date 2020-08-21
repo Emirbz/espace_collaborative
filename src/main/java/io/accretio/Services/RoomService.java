@@ -8,6 +8,7 @@ import io.accretio.Utils.FileUploader;
 import io.minio.errors.*;
 import org.jboss.logging.Logger;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.IOException;
@@ -69,7 +70,7 @@ public class RoomService {
         return roomRepository.findById(id);
     }
 
-    public List<Room> getMyRooms(User user, String name) {
+    public List<Room> getMyRooms(User user, @Nullable String name) {
         List<Room> rooms;
         assert name != null;
         if (name.length() == 0) {
@@ -86,5 +87,19 @@ public class RoomService {
         room.getUsers().remove(user);
         roomRepository.persist(room);
         return room;
+    }
+
+    public List<Room> getMyCreatedRooms(User user, @Nullable String name) {
+        List<Room> rooms;
+        assert name != null;
+        if (name.length() == 0) {
+            rooms = getRoom();
+
+        } else {
+            rooms = roomRepository.searchRoomByName(name);
+        }
+        return rooms.stream().filter(room -> room.getUser().getId().equals(user.getId())).collect(Collectors.toList());
+
+
     }
 }

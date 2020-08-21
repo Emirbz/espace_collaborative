@@ -1,20 +1,18 @@
 package io.accretio.Models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
 
 @Table
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Room extends PanacheEntityBase {
 
 
@@ -28,6 +26,16 @@ public class Room extends PanacheEntityBase {
     private String image;
 
     public String subject;
+
+    public boolean isPrivate;
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private User user;
@@ -77,7 +85,6 @@ public class Room extends PanacheEntityBase {
     }
 
 
-
     public void setUsers(Set<User> users) {
         this.users = users;
     }
@@ -88,7 +95,6 @@ public class Room extends PanacheEntityBase {
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> users = new HashSet<>();
-
 
 
     @Override
@@ -106,6 +112,7 @@ public class Room extends PanacheEntityBase {
     public Room(long id) {
         this.id = id;
     }
+
     public Room() {
 
     }

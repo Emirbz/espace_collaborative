@@ -24,6 +24,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class RoomController {
 
+    private User loggedUser;
+
 
     @Inject
     RoomService roomService;
@@ -86,6 +88,16 @@ public class RoomController {
 
 
     }
+    public boolean getUserIdentity() {
+        Principal caller = identity.getPrincipal();
+        String userName = caller == null ? "none" : caller.getName();
+        if (userName.equals("none")) {
+            return true;
+
+        }
+        loggedUser = userService.findUserByUsername(userName);
+        return false;
+    }
 
     @PUT
     @Path("/join/{id}")
@@ -95,16 +107,14 @@ public class RoomController {
         if (entity == null) {
             return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
-        Principal caller = identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none")) {
+        if (getUserIdentity())
+        {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
-        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(user.getId()))) {
+        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(loggedUser.getId()))) {
             return Response.ok(entity).status(204).build();
         }
-        Room room = roomService.addUsers(entity, user);
+        Room room = roomService.addUsers(entity, loggedUser);
         return Response.ok(room).status(200).build();
 
     }
@@ -117,17 +127,15 @@ public class RoomController {
         if (entity == null) {
             return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
-        Principal caller = identity.getPrincipal();
-        String userName = caller == null ? "none" : caller.getName();
-        if (userName.equals("none")) {
+        if (getUserIdentity())
+        {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
-        User user = userService.findUserByUsername(userName);
 
-        if (entity.getUsers().stream().noneMatch(user1 -> user1.getId().equals(user.getId()))) {
+        if (entity.getUsers().stream().noneMatch(user1 -> user1.getId().equals(loggedUser.getId()))) {
             return ForbiddenException.ForbiddenResponse("User is not part of this room");
         }
-        Room room = roomService.removeUser(entity, user);
+        Room room = roomService.removeUser(entity, loggedUser);
         return Response.ok(room).status(200).build();
 
     }
