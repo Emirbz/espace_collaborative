@@ -29,6 +29,25 @@ public class Room extends PanacheEntityBase {
 
     public boolean isPrivate;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private User user;
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(name = "room_user",
+            joinColumns = @JoinColumn(name = "room_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> users = new HashSet<>();
+
+    public RoomRequest.requestType getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(RoomRequest.requestType requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
+    @Transient
+    private RoomRequest.requestType requestStatus;
+
     public boolean isPrivate() {
         return isPrivate;
     }
@@ -37,8 +56,6 @@ public class Room extends PanacheEntityBase {
         isPrivate = aPrivate;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    private User user;
 
     public User getUser() {
         return user;
@@ -88,13 +105,6 @@ public class Room extends PanacheEntityBase {
     public void setUsers(Set<User> users) {
         this.users = users;
     }
-
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "room_user",
-            joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> users = new HashSet<>();
 
 
     @Override

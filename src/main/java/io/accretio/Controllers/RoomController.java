@@ -47,9 +47,13 @@ public class RoomController {
     }
 
     @GET
-    @Produces("application/json")
     public Response getRooms() {
-        List<Room> room = roomService.getRoom();
+        if (getUserIdentity())
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+
+        List<Room> room = roomService.getRoom(loggedUser);
         return Response.ok(room).build();
     }
 

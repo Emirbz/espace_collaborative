@@ -2,6 +2,7 @@ package io.accretio.Services;
 
 import io.accretio.Config.LoggingFilter;
 import io.accretio.Models.Room;
+import io.accretio.Models.RoomRequest;
 import io.accretio.Models.User;
 import io.accretio.Repository.RoomRepository;
 import io.accretio.Utils.FileUploader;
@@ -22,11 +23,23 @@ public class RoomService {
     @Inject
     RoomRepository roomRepository;
 
-    public List<Room> getRoom() {
-        return roomRepository.listAll();
-    }
+    @Inject
+    RoomRequestService roomRequestService;
 
     private static final Logger LOG = Logger.getLogger(LoggingFilter.class);
+
+    public List<Room> getRoom(User loggedUser) {
+        List<Room> roomList = roomRepository.listAll();
+
+
+        roomList.forEach(room -> {
+            RoomRequest roomRequest = roomRequestService.checkUserGotRequest(loggedUser, room);
+            if (roomRequest != null) {
+                room.setRequestStatus(roomRequest.status);
+            }
+        });
+        return roomList;
+    }
 
     public void addRoom(Room room) {
         if (room.getImage() != null) {
@@ -43,11 +56,6 @@ public class RoomService {
 
     }
 
-    /*
-     * public void addUser(User user,long id){
-     * if(getSigneRoom(id).getUsers().contains(user)) { return; }
-     * getSigneRoom(id).getUsers().add(user); }
-     */
 
     public void deleteRoom(Room room) {
         roomRepository.delete(room);
@@ -61,6 +69,19 @@ public class RoomService {
     }
 
     public Room addUsers(Room room, User user) {
+        if (room.isPrivate) {
+            RoomRequest roomRequest = roomRequestService.checkUserGotRequest(user, room);
+            if (roomRequest == null) {
+                roomRequestService.addRequest(user, room);
+                room.setRequestStatus(RoomRequest.requestType.PENDING);
+            } else if (roomRequest.getStatus().equals(RoomRequest.requestType.ACCEPTED)) {
+                room.getUsers().add(user);
+                roomRepository.persist(room);
+            }
+
+            return room;
+
+        }
         room.getUsers().add(user);
         roomRepository.persist(room);
         return room;
@@ -74,7 +95,7 @@ public class RoomService {
         List<Room> rooms;
         assert name != null;
         if (name.length() == 0) {
-            rooms = getRoom();
+            rooms = getRoom(user);
 
         } else {
             rooms = roomRepository.searchRoomByName(name);
@@ -93,7 +114,7 @@ public class RoomService {
         List<Room> rooms;
         assert name != null;
         if (name.length() == 0) {
-            rooms = getRoom();
+            rooms = getRoom(user);
 
         } else {
             rooms = roomRepository.searchRoomByName(name);

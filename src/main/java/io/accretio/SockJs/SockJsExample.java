@@ -27,7 +27,6 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +42,6 @@ public class SockJsExample {
     private BridgeOptionImpl bridgeOption;
     private String roomId;
     private final ObjectMapper objectMapper;
-
 
 
     EventBus eventBus;
@@ -77,29 +75,33 @@ public class SockJsExample {
     }
 
     public void init(@Observes Router router) {
+
         router.route("/ws/chat/*").handler(routingContext -> {
             roomId = routingContext.request().getParam("room_id");
+            LOG.info("room id " +roomId);
 
             vertx.eventBus().consumer("chat.to.server", (Message<JsonObject> message) -> {
 
                 if (message.body() instanceof JsonObject) {
+                    LOG.info("d5al");
                     JsonObject frontBody = message.body();
+                    LOG.info("d5al2");
                     String type = frontBody.getString("type");
-                    LOG.info("Front Body mobile"+frontBody);
+                    LOG.info("Front Body mobile" + frontBody);
 
                     switch (type) {
                         case "TEXT":
 
-                            publishText(frontBody,roomId,type);
+                            publishText(frontBody, roomId, type);
                             break;
-                            case "SONDAGE":
-                                publishSondage(frontBody,roomId,type);
-                                break;
+                        case "SONDAGE":
+                            publishSondage(frontBody, roomId, type);
+                            break;
                         case "VOTE":
-                            publishVote(frontBody,roomId,type);
+                            publishVote(frontBody, roomId, type);
                             break;
                         case "REACTION":
-                            publishReaction(frontBody,roomId,type);
+                            publishReaction(frontBody, roomId, type);
                             break;
                         case "IMAGE":
                             try {
@@ -113,13 +115,13 @@ public class SockJsExample {
                             message.body().put("body", "");
                             break;
                     }
-                   // pubish(message, roomId,type);
+                    // pubish(message, roomId,type);
 
                 }
 
             });
-            this.bridgeOption.setBridgeOptionMobile("chat.to.server" ,"chat.to.client/"+roomId);
-            this.bridgeOption.setBridgeOptionWeb("chat.to.server" ,"chat.to.client/"+roomId);
+            this.bridgeOption.setBridgeOptionMobile("chat.to.server", "chat.to.client/" + roomId);
+            this.bridgeOption.setBridgeOptionWeb("chat.to.server", "chat.to.client/" + roomId);
 
             TcpEventBusBridge bridge = TcpEventBusBridge.create(vertx,
                     this.bridgeOption.getBridgeOptionMobile());
@@ -158,9 +160,8 @@ public class SockJsExample {
     private void publishSondage(JsonObject frontBody, String roomId, String type) {
         Func function1 = (action, data) -> {
             LOG.info("Mapping  Sondage");
-            LOG.info("FrontBody Mehdi"+frontBody.getString("body"));
             io.accretio.Models.Message sondage = objectMapper.readValue(frontBody.getString("body"), io.accretio.Models.Message.class);
-            LOG.info("next Step"+sondage.getBody());
+            LOG.info("next Step");
             new Thread(() -> {
                 io.accretio.Models.Message submittedSondage = sondageService.addSondageEventBus(sondage);
                 action.resolve(submittedSondage);
@@ -169,9 +170,9 @@ public class SockJsExample {
 
         Func function2 = (action, data) -> {
 
-            frontBody.put("body",objectMapper.writeValueAsString(data));
+            frontBody.put("body", objectMapper.writeValueAsString(data));
 
-            publish(frontBody, type,  roomId);
+            publish(frontBody, type, roomId);
             action.resolve();
         };
 
@@ -181,7 +182,6 @@ public class SockJsExample {
                 .start();// start Promise operation
 
 
-
     }
 
     private void publishReaction(JsonObject frontBody, String roomId, String type) {
@@ -189,15 +189,15 @@ public class SockJsExample {
             new Thread(() -> {
                 User user = userService.findUserById(frontBody.getString("user_id"));
                 io.accretio.Models.Message message = new io.accretio.Models.Message(frontBody.getInteger("message_id"));
-                Reaction reaction = new Reaction(Reaction.reactionType.valueOf(frontBody.getString("body")) ,user);
-                reactionService.addReactionEventBus(reaction,message);
+                Reaction reaction = new Reaction(Reaction.reactionType.valueOf(frontBody.getString("body")), user);
+                reactionService.addReactionEventBus(reaction, message);
                 action.resolve(reaction);
             }).start();
         };
 
         Func function2 = (action, data) -> {
-            frontBody.put("body",objectMapper.writeValueAsString(data));
-            publish(frontBody, type,  roomId);
+            frontBody.put("body", objectMapper.writeValueAsString(data));
+            publish(frontBody, type, roomId);
             action.resolve();
         };
 
@@ -226,8 +226,8 @@ public class SockJsExample {
         };
 
         Func function2 = (action, data) -> {
-            frontBody.put("body",objectMapper.writeValueAsString(data));
-            publish(frontBody, type,  roomId);
+            frontBody.put("body", objectMapper.writeValueAsString(data));
+            publish(frontBody, type, roomId);
             action.resolve();
         };
 
@@ -237,15 +237,13 @@ public class SockJsExample {
                 .start();// start Promise operation
 
 
-
     }
 
-    private void publish(JsonObject message,  String type, String roomId) {
+    private void publish(JsonObject message, String type, String roomId) {
         //TODO timestamp
         message.put("type", type);
-        LOG.info("Publishing from mobile with room id = "+roomId);
-        vertx.eventBus().publish("chat.to.client/"+roomId, message);
-
+        LOG.info("Publishing from mobile with room id = " + roomId);
+        vertx.eventBus().publish("chat.to.client/" + roomId, message);
 
 
     }
@@ -275,9 +273,6 @@ public class SockJsExample {
         });
         return sockJSHandler;
     }
-
-
-
 
 
 }
