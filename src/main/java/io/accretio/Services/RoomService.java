@@ -107,6 +107,10 @@ public class RoomService {
     public Room removeUser(Room room, User user) {
         room.getUsers().remove(user);
         roomRepository.persist(room);
+        RoomRequest roomRequest = roomRequestService.checkUserGotRequest(user, room);
+        if (roomRequest != null) {
+            roomRequestService.deleteRoomRequest(roomRequest);
+        }
         return room;
     }
 

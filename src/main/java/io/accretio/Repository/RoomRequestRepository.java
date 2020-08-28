@@ -28,4 +28,6 @@ public class RoomRequestRepository implements PanacheRepository<RoomRequest> {
     public void rejectRequest(RoomRequest roomRequest) {
         update("status=?1 where id=?2",RoomRequest.requestType.REJECTED,roomRequest.getId());
     }
+
+
 }

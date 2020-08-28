@@ -100,7 +100,8 @@ public class RoomController {
 
         }
         loggedUser = userService.findUserByUsername(userName);
-        return false;
+        return loggedUser == null;
+
     }
 
     @PUT
@@ -124,7 +125,7 @@ public class RoomController {
     }
 
     @PUT
-    @Path("/leav/{id}")
+    @Path("/leave/{id}")
     @Transactional
     public Response leavRoom(@PathParam Integer id) {
         Room entity = roomService.getSigneRoom(id);

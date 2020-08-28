@@ -36,7 +36,6 @@ public class UserService {
     }
 
     public User findUserByUsername(String username) {
-        System.out.println(username);
         return userRepository.find("username", username).firstResult();
     }
 

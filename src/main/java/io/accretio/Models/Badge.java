@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @Table
 @Entity
-public class Badge extends PanacheEntityBase {
+public class Badge extends PanacheEntityBase  {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

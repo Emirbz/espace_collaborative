@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -12,8 +13,9 @@ import java.util.Set;
 
 @Table
 @Entity
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Room extends PanacheEntityBase {
+public class Room extends PanacheEntityBase  {
 
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)

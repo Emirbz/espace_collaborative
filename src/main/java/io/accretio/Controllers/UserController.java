@@ -68,7 +68,7 @@ public class UserController {
 
         }
         loggedUser = userService.findUserByUsername(userName);
-        return false;
+        return loggedUser == null;
     }
 
     @GET

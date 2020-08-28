@@ -21,7 +21,6 @@ public class RoomRequestService {
     RoomService roomService;
 
 
-
     private static final Logger LOG = Logger.getLogger(LoggingFilter.class);
 
 
@@ -36,12 +35,10 @@ public class RoomRequestService {
     public void addRequest(User user, Room room) {
         RoomRequest roomRequest = new RoomRequest(room, user, RoomRequest.requestType.PENDING);
         roomRequestRepository.persist(roomRequest);
-
     }
 
     public List<RoomRequest> getMyRequests(User loggedUser) {
         List<RoomRequest> roomRequestList = roomRequestRepository.findPendingRequests();
-
         roomRequestList.removeIf(roomRequest -> !roomRequest.getRoom().getUser().getId().equals(loggedUser.getId()));
         return roomRequestList;
 
@@ -50,9 +47,16 @@ public class RoomRequestService {
     public void acceptRequest(RoomRequest roomRequest) {
         roomRequestRepository.acceptRequest(roomRequest);
         roomRequest.setStatus(RoomRequest.requestType.ACCEPTED);
-        roomService.addUsers(roomRequest.getRoom(),roomRequest.getUser());
+        roomService.addUsers(roomRequest.getRoom(), roomRequest.getUser());
     }
+
     public void rejectRequest(RoomRequest roomRequest) {
         roomRequestRepository.rejectRequest(roomRequest);
     }
+
+    public void deleteRoomRequest(RoomRequest roomRequest) {
+        roomRequestRepository.delete(roomRequest);
+    }
+
+
 }

@@ -43,7 +43,7 @@ public class RoomRequestController {
 
         }
         loggedUser = userService.findUserByUsername(userName);
-        return false;
+        return loggedUser == null;
     }
 
     @GET
@@ -53,6 +53,7 @@ public class RoomRequestController {
         if (getUserIdentity()) {
             return ForbiddenException.ForbiddenResponse("Invalid Acces token");
         }
+
         List<RoomRequest> roomRequests = roomRequestService.getMyRequests(loggedUser);
         return Response.ok(roomRequests).status(200).build();
     }

@@ -28,9 +28,10 @@ public class RoomRequest extends PanacheEntityBase {
     @Id
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Room room;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private User user;
 
     @Enumerated(EnumType.STRING)
