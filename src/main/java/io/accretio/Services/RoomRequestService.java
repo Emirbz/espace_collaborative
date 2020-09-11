@@ -47,7 +47,7 @@ public class RoomRequestService {
     public void acceptRequest(RoomRequest roomRequest) {
         roomRequestRepository.acceptRequest(roomRequest);
         roomRequest.setStatus(RoomRequest.requestType.ACCEPTED);
-        roomService.addUsers(roomRequest.getRoom(), roomRequest.getUser());
+        roomService.addUser(roomRequest.getRoom(), roomRequest.getUser());
     }
 
     public void rejectRequest(RoomRequest roomRequest) {
@@ -59,4 +59,7 @@ public class RoomRequestService {
     }
 
 
+    public void resendRequest(RoomRequest roomRequest) {
+        roomRequestRepository.resendRequest(roomRequest);
+    }
 }

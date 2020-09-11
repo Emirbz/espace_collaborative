@@ -13,8 +13,6 @@ import java.util.Set;
 
 @Table
 @Entity
-
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Room extends PanacheEntityBase  {
 
 

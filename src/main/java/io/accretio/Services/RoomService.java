@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -42,7 +43,7 @@ public class RoomService {
     }
 
     public void addRoom(Room room) {
-        if (room.getImage() != null) {
+       /* if (room.getImage() != null) {
             try {
                 room.setImage(new FileUploader().addImage(room.getImage()));
             } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException
@@ -51,7 +52,7 @@ public class RoomService {
                     | ErrorResponseException | RegionConflictException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         roomRepository.persist(room);
 
     }
@@ -68,19 +69,23 @@ public class RoomService {
 
     }
 
-    public Room addUsers(Room room, User user) {
-        if (room.isPrivate) {
-            RoomRequest roomRequest = roomRequestService.checkUserGotRequest(user, room);
-            if (roomRequest == null) {
-                roomRequestService.addRequest(user, room);
-                room.setRequestStatus(RoomRequest.requestType.PENDING);
-            } else if (roomRequest.getStatus().equals(RoomRequest.requestType.ACCEPTED)) {
-                room.getUsers().add(user);
-                roomRepository.persist(room);
+    public Room addUser(Room room, User user) {
+        if (!room.getUser().getId().equals(user.getId())) {
+            if (room.isPrivate) {
+                RoomRequest roomRequest = roomRequestService.checkUserGotRequest(user, room);
+                if (roomRequest == null) {
+                    roomRequestService.addRequest(user, room);
+                    room.setRequestStatus(RoomRequest.requestType.PENDING);
+                } else if (roomRequest.getStatus().equals(RoomRequest.requestType.ACCEPTED)) {
+                    room.getUsers().add(user);
+                    roomRepository.persist(room);
+                } else if (roomRequest.getStatus().equals(RoomRequest.requestType.REJECTED)) {
+                    roomRequestService.resendRequest(roomRequest);
+                }
+
+                return room;
+
             }
-
-            return room;
-
         }
         room.getUsers().add(user);
         roomRepository.persist(room);
@@ -126,5 +131,21 @@ public class RoomService {
         return rooms.stream().filter(room -> room.getUser().getId().equals(user.getId())).collect(Collectors.toList());
 
 
+    }
+
+    public Room addUsers(Room room, List<User> users) {
+        users.removeIf(u -> room.getUsers().stream().anyMatch(user -> user.getId().equals(u.getId())));
+        room.getUsers().addAll(users);
+        // ------ Delete room request if exist
+        users.stream().map(user -> roomRequestService.checkUserGotRequest(user, room)).filter(Objects::nonNull).forEach(roomRequest -> roomRequestService.deleteRoomRequest(roomRequest));
+        room.persist();
+        return room;
+
+    }
+
+    public List<Room> getMyCreatedJoinedRoom(User loggedUser) {
+        List<Room> roomList = getRoom(loggedUser);
+        roomList.removeIf(room -> !room.getUsers().contains(loggedUser) && !room.getUser().getId().equals(loggedUser.getId()));
+        return roomList;
     }
 }

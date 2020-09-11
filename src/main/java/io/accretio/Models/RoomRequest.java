@@ -6,6 +6,7 @@ import javax.persistence.*;
 
 @Table
 @Entity
+
 public class RoomRequest extends PanacheEntityBase {
     public enum requestType {
         PENDING,

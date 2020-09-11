@@ -30,4 +30,8 @@ public class RoomRequestRepository implements PanacheRepository<RoomRequest> {
     }
 
 
+    public void resendRequest(RoomRequest roomRequest) {
+        update("status=?1 where id=?2",RoomRequest.requestType.PENDING,roomRequest.getId());
+
+    }
 }

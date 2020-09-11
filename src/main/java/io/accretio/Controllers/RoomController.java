@@ -75,23 +75,28 @@ public class RoomController {
     }
 
     @PUT
-    @Path("/user/{id}")
+    @Path("/users/{roomId}")
     @Transactional
-    public Response updateRoomUsers(@PathParam Integer id, User user) {
-        Room entity = roomService.getSigneRoom(id);
-        if (entity == null) {
-            return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
+    public Response updateRoomUsers(@PathParam Integer roomId, List<User> users) {
+        if (getUserIdentity()) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        System.out.println(roomId);
+        Room room = roomService.getSigneRoom(roomId);
+
+        if (room == null) {
+            return NotFoundException.NotFoundResponse("room with id " + roomId + " not found");
+        }
+        if (!room.getUser().getId().equals(loggedUser.getId())) {
+            return ForbiddenException.ForbiddenResponse("You don't own this room");
         }
 
-        if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(user.getId()))) {
-            return Response.ok(entity).status(204).build();
-
-        }
-        Room room = roomService.addUsers(entity, user);
-        return Response.ok(room).status(200).build();
+        Room persistedRoom = roomService.addUsers(room, users);
+        return Response.ok(persistedRoom).status(200).build();
 
 
     }
+
     public boolean getUserIdentity() {
         Principal caller = identity.getPrincipal();
         String userName = caller == null ? "none" : caller.getName();
@@ -119,7 +124,7 @@ public class RoomController {
         if (entity.getUsers().stream().anyMatch(user1 -> user1.getId().equals(loggedUser.getId()))) {
             return Response.ok(entity).status(204).build();
         }
-        Room room = roomService.addUsers(entity, loggedUser);
+        Room room = roomService.addUser(entity, loggedUser);
         return Response.ok(room).status(200).build();
 
     }
@@ -159,11 +164,20 @@ public class RoomController {
     @Path("{id}")
     @Transactional
     public Response deleteRoom(@PathParam Integer id) {
+        if (getUserIdentity()) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+
+
         Room entity = roomService.getSigneRoom(id);
 
         if (entity == null) {
             return NotFoundException.NotFoundResponse("Room with id " + id + " not found");
         }
+        if (!entity.getUser().getId().equals(loggedUser.getId())) {
+            return ForbiddenException.ForbiddenResponse("You don't own this room");
+        }
+
         roomService.deleteRoom(entity);
         return Response.status(204).build();
     }

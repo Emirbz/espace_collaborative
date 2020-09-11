@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Repository.UserRepository;
 import io.vertx.core.json.JsonObject;
@@ -167,4 +168,10 @@ public class UserService {
     }
 
 
+    public List<User> getUsersToInvite(Room room) {
+        List<User> userList = getUser();
+        userList.removeIf(u -> room.getUsers().contains(u));
+        return userList;
+
+    }
 }

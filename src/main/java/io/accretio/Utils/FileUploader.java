@@ -1,7 +1,6 @@
 package io.accretio.Utils;
 
 import io.minio.MinioClient;
-import io.minio.PutObjectOptions;
 import io.minio.errors.*;
 import io.minio.http.Method;
 
@@ -22,7 +21,7 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)*/
 public class FileUploader {
 
-    InputStream inputStream;
+ /*   InputStream inputStream;
 
     public String addImage(String img) throws InvalidPortException, InvalidEndpointException, IOException, InvalidKeyException, NoSuchAlgorithmException, InsufficientDataException, InvalidExpiresRangeException, InvalidResponseException, InternalException, XmlParserException, InvalidBucketNameException, ErrorResponseException, RegionConflictException {
         final String imgName = UUID.randomUUID().toString();
@@ -69,6 +68,6 @@ public class FileUploader {
 
         return url;
     }
-
+*/
 
 }

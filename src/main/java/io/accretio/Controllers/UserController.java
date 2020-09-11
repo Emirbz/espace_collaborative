@@ -116,6 +116,20 @@ public class UserController {
     }
 
     @GET
+    @Path("/room/me")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response CreatedAndJoinedRoom() {
+        if (getUserIdentity())
+        {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        List<Room> rooms = roomService.getMyCreatedJoinedRoom(loggedUser);
+
+        return Response.ok(rooms).status(200).build();
+    }
+
+    @GET
     @Path("/stats")
     @Produces(MediaType.APPLICATION_JSON)
     @NoCache
@@ -171,6 +185,28 @@ public class UserController {
     @PermitAll
     public Response getUsers() {
         List<User> user = userService.getUser();
+        return Response.ok(user).build();
+    }
+
+
+    @GET
+    @Produces("application/json")
+    @NoCache
+    @Path("/invite/{roomId}")
+    @PermitAll
+    public Response getUsersToInvite(@PathParam long roomId) {
+        if (getUserIdentity()) {
+            return ForbiddenException.ForbiddenResponse("Invalid Acces token");
+        }
+        Room room = roomService.getSigneRoom(roomId);
+
+        if (room == null) {
+            return NotFoundException.NotFoundResponse("room with id " + roomId + " not found");
+        }
+        if (!room.getUser().getId().equals(loggedUser.getId())) {
+            return ForbiddenException.ForbiddenResponse("You don't own this room");
+        }
+        List<User> user = userService.getUsersToInvite(room);
         return Response.ok(user).build();
     }
 

@@ -26,6 +26,18 @@ public class Message extends PanacheEntityBase {
     @Id
     public long id;
 
+
+    @Transient
+    public File metaData;
+
+    public File getMetaData() {
+        return metaData;
+    }
+
+    public void setMetaData(File metaData) {
+        this.metaData = metaData;
+    }
+
     @Lob
     private String body;
 
@@ -47,6 +59,8 @@ public class Message extends PanacheEntityBase {
     public void setId(long id) {
         this.id = id;
     }
+
+
 
 
     @Enumerated(EnumType.ORDINAL)

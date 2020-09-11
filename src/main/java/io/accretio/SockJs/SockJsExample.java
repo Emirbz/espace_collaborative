@@ -91,7 +91,7 @@ public class SockJsExample {
 
                     switch (type) {
                         case "TEXT":
-
+                        case "IMAGE":
                             publishText(frontBody, roomId, type);
                             break;
                         case "SONDAGE":
@@ -103,17 +103,7 @@ public class SockJsExample {
                         case "REACTION":
                             publishReaction(frontBody, roomId, type);
                             break;
-                        case "IMAGE":
-                            try {
-                                message.body().put("file", new FileUploader().addImage(message.body().getString("file")));
-                            } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException
-                                    | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException
-                                    | InvalidResponseException | InternalException | XmlParserException
-                                    | InvalidBucketNameException | ErrorResponseException | RegionConflictException e) {
-                                e.printStackTrace();
-                            }
-                            message.body().put("body", "");
-                            break;
+
                     }
                     // pubish(message, roomId,type);
 
@@ -217,7 +207,14 @@ public class SockJsExample {
                 io.accretio.Models.Message message = new io.accretio.Models.Message();
                 message.setBody(frontBody.getString("body"));
                 message.setUser(user);
-                message.setType(io.accretio.Models.Message.type.TEXT);
+                if (type.equals("TEXT")) {
+                    message.setType(io.accretio.Models.Message.type.TEXT);
+                    message.setBody(frontBody.getString("body"));
+                }
+                if (type.equals("IMAGE")) {
+                    message.setType(io.accretio.Models.Message.type.IMAGE);
+                    message.setFile(frontBody.getString("file"));
+                }
                 message.setRoom(new Room(frontBody.getInteger("room_id")));
                 message.setReactions(new HashSet<>());
                 io.accretio.Models.Message submittedMessage = messageService.addMessageEventBus(message);

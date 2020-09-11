@@ -1,27 +1,25 @@
 package io.accretio.Controllers;
 
 
-import java.text.ParseException;
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
 import io.accretio.Errors.NotFoundException;
+import io.accretio.Minio.MinioFileService;
 import io.accretio.Models.Message;
 import io.accretio.Models.Room;
 import io.accretio.Services.MessageService;
 import io.accretio.Services.RoomService;
+import org.jboss.resteasy.annotations.jaxrs.PathParam;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 @Path("/msg")
@@ -35,10 +33,14 @@ public class MessageController {
     @Inject
     RoomService roomService;
 
+
+    @Inject
+    MinioFileService minioFileService;
+
     @POST
     @Produces("application/json")
     @Transactional
-    public Response addMessage(Message message) throws ParseException {
+    public Response addMessage(Message message)  {
 
 
         messageService.addMessage(message);
@@ -61,6 +63,7 @@ public class MessageController {
         return Response.ok(messages).build();
     }
 
+    
 
 
     @GET
@@ -77,6 +80,23 @@ public class MessageController {
 
         List<Message> messages = messageService.findByRoom(id);
         return Response.ok(messages).build();
+    }
+
+
+    @Path("/files/metaData/{fileId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String,String> getFileMetaData(@PathParam String fileId){
+
+        Map<String,String> metadata;
+        try{
+            metadata= minioFileService.getFileMetaData(fileId);
+        }catch(Exception e){
+            metadata=new HashMap<>();
+            e.printStackTrace();
+        }
+        return metadata;
+
     }
 
 

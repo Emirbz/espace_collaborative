@@ -7,8 +7,6 @@ import io.accretio.Models.Reaction;
 import io.accretio.Models.Room;
 import io.accretio.Models.User;
 import io.accretio.Services.*;
-import io.accretio.Utils.FileUploader;
-import io.minio.errors.*;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.sockjs.BridgeEvent;
@@ -18,9 +16,6 @@ import org.riversun.promise.Promise;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +73,10 @@ public class NotificationServiceImpl implements NotificationService {
         String type = frontBody.getString("type");
         switch (type) {
             case "TEXT":
+            case "IMAGE":
+            case "FILE":
+            case "VIDEO":
+            case "AUDIO":
                 publishText(jsonObject, frontBody, type, eventBus, roomId);
                 break;
 
@@ -91,25 +90,15 @@ public class NotificationServiceImpl implements NotificationService {
             case "SONDAGE":
                 publishSondage(jsonObject, frontBody, type, eventBus, roomId);
                 break;
-            case "IMAGE":
-                try {
-                    jsonObject.put("file", new FileUploader().addImage(frontBody.getString("file")));
-                } catch (InvalidPortException | InvalidEndpointException | IOException | InvalidKeyException
-                        | NoSuchAlgorithmException | InsufficientDataException | InvalidExpiresRangeException
-                        | InvalidResponseException | InternalException | XmlParserException | InvalidBucketNameException
-                        | ErrorResponseException | RegionConflictException e) {
-                    e.printStackTrace();
-                }
-                jsonObject.put("type", "IMAGE");
-                jsonObject.put("body", "");
-                break;
+
         }
-        if (!type.equals("SONDAGE") && !type.equals("TEXT") && !type.equals("REACTION") && !type.equals("VOTE")) {
+        /*if (!type.equals("SONDAGE") && !type.equals("TEXT") && !type.equals("REACTION") && !type.equals("VOTE") && !type.equals("IMAGE")) {
             publish(jsonObject, type, eventBus, roomId);
-        }
+        }*/
 
 
     }
+
 
     private void publishVote(JsonObject jsonObject, JsonObject frontBody, String type, EventBus eventBus, String roomId) {
         Func function1 = (action, data) -> {
@@ -140,8 +129,8 @@ public class NotificationServiceImpl implements NotificationService {
             new Thread(() -> {
                 User user = userService.findUserById(frontBody.getString("user_id"));
                 Message message = new Message(frontBody.getInteger("message_id"));
-                Reaction reaction = new Reaction(Reaction.reactionType.valueOf(frontBody.getString("body")) ,user);
-                reactionService.addReactionEventBus(reaction,message);
+                Reaction reaction = new Reaction(Reaction.reactionType.valueOf(frontBody.getString("body")), user);
+                reactionService.addReactionEventBus(reaction, message);
                 action.resolve(reaction);
             }).start();
         };
@@ -190,13 +179,33 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void publishText(JsonObject jsonObject, JsonObject frontBody, String type, EventBus eventBus, String roomId) {
+
         Func function1 = (action, data) -> {
             new Thread(() -> {
                 User user = userService.findUserById(frontBody.getString("user_id"));
                 Message message = new Message();
-                message.setBody(frontBody.getString("body"));
                 message.setUser(user);
-                message.setType(Message.type.TEXT);
+
+                if (type.equals("TEXT")) {
+                    message.setType(Message.type.TEXT);
+                    message.setBody(frontBody.getString("body"));
+                }
+                if (type.equals("IMAGE")) {
+                    message.setType(Message.type.IMAGE);
+                    message.setFile(frontBody.getString("file"));
+                }
+                if (type.equals("VIDEO")) {
+                    message.setType(Message.type.VIDEO);
+                    message.setFile(frontBody.getString("file"));
+                }
+                if (type.equals("AUDIO")) {
+                    message.setType(Message.type.AUDIO);
+                    message.setFile(frontBody.getString("file"));
+                }
+                if (type.equals("FILE")) {
+                    message.setType(Message.type.FILE);
+                    message.setFile(frontBody.getString("file"));
+                }
                 message.setRoom(new Room(frontBody.getInteger("room_id")));
                 message.setReactions(new HashSet<>());
                 Message submittedMessage = messageService.addMessageEventBus(message);
