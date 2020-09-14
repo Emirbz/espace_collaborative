@@ -67,7 +67,7 @@ public class MessageService {
         this.objectMapper = new ObjectMapper();
 
         List<Message> messageList = messageRepository.find("room_id", Sort.by("timestamp", Sort.Direction.Ascending), id).list();
-        messageList.stream().filter(m -> !m.getType().equals(Message.type.TEXT)).forEach(this::setMessageMetaData);
+        messageList.stream().filter(m -> !m.getType().equals(Message.type.TEXT) && !m.getType().equals(Message.type.SONDAGE)).forEach(this::setMessageMetaData);
         return messageList;
     }
 
@@ -86,9 +86,7 @@ public class MessageService {
     public void setMessageMetaData(Message message)
     {
         Map<String,String> stringStringMap = minioFileService.getFileMetaData(message.getFile());
-        LOG.info("---------- META DATA --------- ");
-        LOG.info(message.getFile());
-        LOG.info(stringStringMap);
+        LOG.info("---------- SETTING META DATA --------- ");
         message.setMetaData(objectMapper.convertValue(minioFileService.getFileMetaData(message.getFile()), File.class));
 
     }

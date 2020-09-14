@@ -43,7 +43,7 @@ public class MinioFileServiceImpl implements MinioFileService {
 
                 objectStat = minioClient.statObject(MinioClientProvider.documentBucketName, fileId);
 
-                if (objectStat.httpHeaders().containsKey("content-disposition") || (objectStat.httpHeaders().containsKey("Content-Disposition"))) {
+                /*if (objectStat.httpHeaders().containsKey("content-disposition") || (objectStat.httpHeaders().containsKey("Content-Disposition"))) {
 
                     String contentDispositionKey = "content-disposition";
 
@@ -55,7 +55,7 @@ public class MinioFileServiceImpl implements MinioFileService {
                     String fileName = getFileNameFromContentDispositionHeader(contentDispositionHeader);
 
                     metadata.put("fileName", fileName);
-                }
+                }*/
 
                 String contentTypeKey = "content-type";
                 if (objectStat.httpHeaders().containsKey("Content-Type")) {
@@ -80,6 +80,8 @@ public class MinioFileServiceImpl implements MinioFileService {
                 e.printStackTrace();
             }
         }
+        assert fileId != null;
+        metadata.put("fileName",fileId.substring(37));
         metadata.put("objectId", fileId);
         return metadata;
     }
