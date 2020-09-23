@@ -54,7 +54,7 @@ public class MessageService {
 
         messageRepository.persist(message);
         LOG.info("Type : "+message.getType());
-        if (!(message.getType().equals(Message.type.TEXT) && (message.getType().equals(Message.type.SONDAGE))))  {
+        if (!message.getType().equals(Message.type.TEXT) && !message.getType().equals(Message.type.SONDAGE)) {
             LOG.info("MAHOUCH TEXT");
             setMessageMetaData(message);
         }
